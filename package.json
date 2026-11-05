@@ -12,5 +12,9 @@
   },
   "devDependencies": {
     "nx": "^24.0.4"
+  },
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
   }
 }
