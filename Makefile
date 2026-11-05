@@ -1,10 +1,14 @@
 DEV = docker compose -f docker/compose.yaml
 PROD = docker compose -f docker/compose.prod.yaml
 
-.PHONY: dev prod down test migrate
+.PHONY: dev logs prod down test migrate
 
 dev:
-	$(DEV) up --build
+	$(DEV) up --build -d
+
+# make logs s=api  (s opcional: api, www ou db; sem s mostra todos)
+logs:
+	$(DEV) logs -f --tail=50 $(s)
 
 prod:
 	$(PROD) up --build -d

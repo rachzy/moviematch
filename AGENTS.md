@@ -14,6 +14,7 @@ Monorepo NX com npm workspaces. NX infere os targets a partir dos `scripts` de c
 
 Tudo roda via Docker; o `Makefile` é a interface principal, mas o repo também deve funcionar sem ele (comandos `docker compose -f docker/...` no README). Mantenha os dois em sincronia. Scripts do root (`dev`, `build`, `start`, `test`) apenas disparam `nx run-many -t <target>`.
 
+- Logs: `make dev` sobe em background; use `make logs s=api|www|db` para acompanhar um serviço.
 - Teste único: `docker compose -f docker/compose.yaml run --rm --no-deps api npm exec -w api -- jest -t "nome do teste"`
 - Nova migration: `make migrate name=...` (commite a pasta gerada em `apps/api/prisma/migrations`).
 
