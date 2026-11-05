@@ -1,4 +1,4 @@
-# Alvos: dev (usado pelo compose de desenvolvimento), api e www (produção)
+# Contexto de build é a raiz do repo. Alvos: dev (compose de desenvolvimento), api e www (produção)
 FROM node:24-alpine AS dev
 RUN apk add --no-cache openssl
 WORKDIR /app
