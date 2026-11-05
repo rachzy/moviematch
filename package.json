@@ -1,0 +1,16 @@
+{
+  "name": "moviematch",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "nx run-many -t dev",
+    "build": "nx run-many -t build",
+    "start": "nx run-many -t start",
+    "test": "nx run-many -t test"
+  },
+  "devDependencies": {
+    "nx": "^24.0.4"
+  }
+}
