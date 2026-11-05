@@ -1,7 +1,7 @@
 DEV = docker compose -f docker/compose.yaml
 PROD = docker compose -f docker/compose.prod.yaml
 
-.PHONY: dev logs prod down test migrate
+.PHONY: dev logs prod down test format migrate
 
 dev:
 	$(DEV) up --build -d
@@ -19,6 +19,10 @@ down:
 
 test:
 	$(DEV) run --rm --no-deps api npm test
+
+# Roda no host (requer npm install)
+format:
+	npm run format
 
 # make migrate name=add_movies
 migrate:

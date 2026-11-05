@@ -1,9 +1,18 @@
 import { HealthBadge } from '@/features/health/ui/HealthBadge';
 
 const steps = [
-  { title: 'Avalie', text: 'Dê notas aos filmes e séries que você já assistiu.' },
-  { title: 'Descubra', text: 'Calculamos a similaridade entre os seus gostos e os de outras pessoas.' },
-  { title: 'Conecte', text: 'Converse com quem combina com você e troque recomendações.' },
+  {
+    title: 'Avalie',
+    text: 'Dê notas aos filmes e séries que você já assistiu.',
+  },
+  {
+    title: 'Descubra',
+    text: 'Calculamos a similaridade entre os seus gostos e os de outras pessoas.',
+  },
+  {
+    title: 'Conecte',
+    text: 'Converse com quem combina com você e troque recomendações.',
+  },
 ];
 
 export default function Home() {

@@ -7,10 +7,10 @@ services:
       POSTGRES_USER: moviematch
       POSTGRES_PASSWORD: moviematch
       POSTGRES_DB: moviematch
-    ports: ["5432:5432"]
+    ports: ['5432:5432']
     volumes: [db:/var/lib/postgresql/data]
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "moviematch"]
+      test: ['CMD', 'pg_isready', '-U', 'moviematch']
       interval: 2s
       retries: 15
 
@@ -19,15 +19,15 @@ services:
     command: npm run dev -w api
     environment:
       DATABASE_URL: postgresql://moviematch:moviematch@db:5432/moviematch
-    ports: ["3001:3001"]
-    volumes: ["../apps:/app/apps"]
+    ports: ['3001:3001']
+    volumes: ['../apps:/app/apps']
     depends_on: { db: { condition: service_healthy } }
 
   www:
     build: { context: .., dockerfile: docker/Dockerfile, target: dev }
     command: npm run dev -w www
-    ports: ["3000:3000"]
-    volumes: ["../apps:/app/apps"]
+    ports: ['3000:3000']
+    volumes: ['../apps:/app/apps']
 
 volumes:
   db:

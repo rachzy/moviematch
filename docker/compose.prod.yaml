@@ -10,7 +10,7 @@ services:
       POSTGRES_DB: moviematch
     volumes: [db:/var/lib/postgresql/data]
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "moviematch"]
+      test: ['CMD', 'pg_isready', '-U', 'moviematch']
       interval: 2s
       retries: 15
 
@@ -19,13 +19,13 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://moviematch:${POSTGRES_PASSWORD}@db:5432/moviematch
-    ports: ["3001:3001"]
+    ports: ['3001:3001']
     depends_on: { db: { condition: service_healthy } }
 
   www:
     build: { context: .., dockerfile: docker/Dockerfile, target: www }
     restart: unless-stopped
-    ports: ["3000:3000"]
+    ports: ['3000:3000']
 
 volumes:
   db:

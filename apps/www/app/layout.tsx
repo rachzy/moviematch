@@ -5,7 +5,11 @@ export const metadata = {
   description: 'Conecte-se com quem tem o mesmo gosto para filmes e séries.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="pt-BR">
       <body>{children}</body>

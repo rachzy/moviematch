@@ -8,10 +8,12 @@
     "dev": "nx run-many -t dev",
     "build": "nx run-many -t build",
     "start": "nx run-many -t start",
-    "test": "nx run-many -t test"
+    "test": "nx run-many -t test",
+    "format": "prettier --write ."
   },
   "devDependencies": {
-    "nx": "^24.0.4"
+    "nx": "^24.0.4",
+    "prettier": "^3.9.10"
   },
   "engines": {
     "node": ">=24",
