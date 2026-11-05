@@ -1,3 +1,5 @@
+import { HealthBadge } from '@/features/health/ui/HealthBadge';
+
 const steps = [
   { title: 'Avalie', text: 'Dê notas aos filmes e séries que você já assistiu.' },
   { title: 'Descubra', text: 'Calculamos a similaridade entre os seus gostos e os de outras pessoas.' },
@@ -12,7 +14,7 @@ export default function Home() {
           Movie<span>Match</span>
         </h1>
         <p>Encontre pessoas que amam os mesmos filmes e séries que você.</p>
-        <small>Em breve</small>
+        <small>Em breve</small> <HealthBadge />
       </section>
       <section className="steps">
         {steps.map((step, i) => (

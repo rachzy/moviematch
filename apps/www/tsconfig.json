@@ -10,6 +10,7 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "strict": true,
+    "paths": { "@/*": ["./*"] },
     "noEmit": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
