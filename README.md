@@ -30,30 +30,39 @@ $env:DATABASE_URL="postgresql://moviematch:moviematch@localhost:5432/moviematch"
 
 ### VS Code
 
-Recomendamos a extensão [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) (`esbenp.prettier-vscode`) para formatar o código ao salvar.
+É recomendado usar a extensão [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) (`esbenp.prettier-vscode`) para formatar o código ao salvar.
 
-## Docker
+## Instalando/Rodando
 
-```bash
-make dev      # desenvolvimento em background (hot reload): www :3000, api :3001, postgres :5432
-make logs s=api   # acompanha os logs de um serviço (api, www ou db); sem s, todos
-make down     # derruba dev e prod
-make test     # roda os testes dentro do container
-make format   # formata o código com Prettier (roda no host: npm install antes)
-make migrate name=nome_da_migration   # cria uma migration Prisma
-```
-
-## Docker sem Makefile
+### Docker (sem Makefile)
 
 Os arquivos ficam em `docker/`; rode sempre da raiz do repositório.
+
+Pra instalar e rodar todo o ambiente de desenvolvimento:
 
 ```bash
 # desenvolvimento
 docker compose -f docker/compose.yaml up --build -d
-docker compose -f docker/compose.yaml logs -f api   # api, www ou db
+docker compose -f docker/compose.yaml logs -f api   # api, www ou db, pra ver os logs
+```
+
+Pra rodar só um projeto (`www` ou `api`; a `api` sobe o `db` junto):
+
+```bash
+docker compose -f docker/compose.yaml up --build -d www
+```
+
+Pra desligar e remover os containers:
+
+```bash
 docker compose -f docker/compose.yaml down
-docker compose -f docker/compose.yaml run --rm --no-deps api npm test
-docker compose -f docker/compose.yaml run --rm api npm exec -w api -- prisma migrate dev --name nome_da_migration
+```
+
+Outros comandos:
+
+```bash
+docker compose -f docker/compose.yaml run --rm --no-deps api npm test # testes
+docker compose -f docker/compose.yaml run --rm api npm exec -w api -- prisma migrate dev --name nome_da_migration # migração
 ```
 
 ## Sem Docker
