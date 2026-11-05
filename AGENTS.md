@@ -29,7 +29,3 @@ Tudo roda via Docker; o `Makefile` é a interface principal (veja o README). Scr
 - **Nest 11** (não 12): o 12 é ESM-only e quebra Jest/CommonJS sem configuração extra.
 - **Prisma 6** (não 7): o 7 exige `prisma.config.ts` e driver adapters.
 - `apps/api/tsconfig.json` declara `types: ["node", "jest"]` explicitamente (o TS atual não inclui `@types/*` automaticamente).
-
-## Git
-
-Commits sem `Co-Authored-By`, feitos pela conta `rachzy`.
