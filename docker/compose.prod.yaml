@@ -1,4 +1,4 @@
-# Produção: requer POSTGRES_PASSWORD no .env (copie docker/.env.example para docker/.env)
+# Produção: use POSTGRES_PASSWORD no docker/.env (veja docker/.env.example); sem ele, a senha padrão é "moviematch"
 name: moviematch
 services:
   db:
@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: moviematch
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-moviematch}
       POSTGRES_DB: moviematch
     volumes: [db:/var/lib/postgresql/data]
     healthcheck:
@@ -18,7 +18,7 @@ services:
     build: { context: .., dockerfile: docker/Dockerfile, target: api }
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://moviematch:${POSTGRES_PASSWORD}@db:5432/moviematch
+      DATABASE_URL: postgresql://moviematch:${POSTGRES_PASSWORD:-moviematch}@db:5432/moviematch
     ports: ['3001:3001']
     depends_on: { db: { condition: service_healthy } }
 
