@@ -6,8 +6,8 @@ MovieMatch: plataforma (projeto de faculdade) que conecta pessoas por similarida
 
 Monorepo NX com npm workspaces. NX infere os targets a partir dos `scripts` de cada `apps/*/package.json` (não há `project.json`).
 
-- `apps/www` — Next.js (App Router) + React, porta 3000. Hoje só uma página estática.
-- `apps/api` — NestJS (Express) + Prisma, porta 3001. Hoje só `GET /health`. O schema (`prisma/schema.prisma`, model `User`) e as migrations existem, mas o Nest ainda não usa o Prisma Client.
+- `apps/www` — Next.js (App Router) + React, porta 3000. Hoje só login (`/`) e cadastro (`/register`), como exemplo funcional.
+- `apps/api` — NestJS (Express) + Prisma, porta 3001. Hoje só `POST /auth/register` e `POST /auth/login` (exemplo funcional, sem JWT/sessão).
 - PostgreSQL 17 via Docker.
 
 ## Comandos
@@ -19,10 +19,18 @@ Tudo roda via Docker; o `Makefile` é a interface principal, mas o repo também 
 - Teste único: `docker compose -f docker/compose.yaml run --rm --no-deps api npm exec -w api -- jest -t "nome do teste"`
 - Nova migration: `make migrate name=...` (commite a pasta gerada em `apps/api/prisma/migrations`).
 
+## Arquitetura da API (`apps/api`)
+
+Exemplo de referência: `auth` + `users`. Fluxo: controller → service → repository → Prisma.
+
+- `<módulo>/` — controller (HTTP), service (regras), `*.schemas.ts` (zod; validação do body via `common/zod-validation.pipe.ts`).
+- `users/` — `user.entity.ts` (entity de domínio) e `user.repository.ts` (único ponto que usa o `PrismaService`; devolve entities, nunca o tipo do Prisma).
+- `prisma/` — `PrismaModule` global.
+
 ## Arquitetura do front (`apps/www`): Feature-Based Layered Architecture
 
 - `app/` — só rotas/layout do Next; compõe features, sem lógica de negócio.
-- `features/<nome>/` — um diretório por funcionalidade, com suas camadas: `types.ts` (modelos), `api.ts` (acesso à API, via axios) e `ui/` (componentes/hooks). Referência: `features/health`.
+- `features/<nome>/` — um diretório por funcionalidade, com suas camadas: `types.ts` (modelos), `api.ts` (acesso à API, via axios) e `ui/` (componentes/hooks). Referência: `features/auth`.
 - `shared/` — código sem dono de feature (ex.: `shared/lib/http.ts`, a instância única do axios).
 - Dependências só descem: `app` → `features/*/ui` → `features/*/api` → `shared`. Features não importam umas das outras; se algo for comum, vai para `shared`.
 - Imports usam o alias `@/` (raiz de `apps/www`). Para novas requisições, sempre use `shared/lib/http.ts`.

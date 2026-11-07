@@ -11,53 +11,49 @@ body {
 }
 
 main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 96px 24px;
-}
-
-.hero {
-  text-align: center;
-  margin-bottom: 80px;
-}
-.hero h1 {
-  font-size: clamp(2.5rem, 8vw, 4.5rem);
-}
-.hero h1 span {
-  color: #f472b6;
-}
-.hero p {
-  margin: 16px 0;
-  font-size: 1.25rem;
-  color: #d4d4d8;
-}
-.hero small {
-  display: inline-block;
-  margin: 0 4px;
-  padding: 4px 12px;
-  border: 1px solid #f472b6;
-  border-radius: 999px;
-  color: #f472b6;
-}
-
-.steps {
   display: grid;
-  gap: 24px;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-.steps article {
+  place-items: center;
+  min-height: 100vh;
   padding: 24px;
+}
+
+.auth {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 360px;
+  padding: 32px;
   border-radius: 16px;
   background: #ffffff10;
+  text-align: center;
 }
-.steps b {
+.auth h1 span {
   color: #f472b6;
-  font-size: 2rem;
 }
-.steps h2 {
-  margin: 8px 0;
+.auth input {
+  padding: 12px;
+  border: 1px solid #ffffff30;
+  border-radius: 8px;
+  color: inherit;
+  background: #00000040;
+  font: inherit;
 }
-.steps p {
-  color: #a1a1aa;
-  line-height: 1.5;
+.auth button {
+  padding: 12px;
+  border: 0;
+  border-radius: 8px;
+  color: #0f0f14;
+  background: #f472b6;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.auth a {
+  color: #f472b6;
+}
+.auth .ok {
+  color: #4ade80;
+}
+.auth .error {
+  color: #f87171;
 }
