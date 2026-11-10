@@ -13,6 +13,7 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Post('register')
+  @HttpCode(201)
   register(@Body(new ZodValidationPipe(registerSchema)) body: RegisterDto) {
     return this.auth.register(body);
   }
