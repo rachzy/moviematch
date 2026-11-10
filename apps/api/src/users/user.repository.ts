@@ -7,10 +7,20 @@ export type CreateUserData = {
   email: string;
   username: string;
   passwordHash: string;
+  verificationToken?: string | null;
+  tokenExpiresAt?: Date | null;
 };
 
 const toEntity = (row: UserRow) =>
-  new User(row.id, row.email, row.username, row.passwordHash, row.createdAt);
+  new User(
+    row.id,
+    row.email,
+    row.username,
+    row.passwordHash,
+    row.createdAt,
+    row.verificationToken,
+    row.tokenExpiresAt,
+  );
 
 // Único lugar que fala com o Prisma sobre usuários.
 @Injectable()
@@ -25,6 +35,22 @@ export class UserRepository {
   async findByUsername(username: string) {
     const row = await this.prisma.user.findUnique({ where: { username } });
     return row ? toEntity(row) : null;
+  }
+
+  async findByVerificationToken(verificationToken: string) {
+    const row = await this.prisma.user.findFirst({ where: { verificationToken } });
+    return row ? toEntity(row) : null;
+  }
+
+  async markEmailAsVerified(userId: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        emailVerifiedAt: new Date(),
+        verificationToken: null,
+        tokenExpiresAt: null,
+      },
+    });
   }
 
   async create(data: CreateUserData) {
