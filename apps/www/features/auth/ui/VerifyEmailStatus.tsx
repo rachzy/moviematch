@@ -59,9 +59,10 @@ export function VerifyEmailStatus({ token }: { token?: string }) {
     <div className="auth">
       <h1>Link inválido ou expirado</h1>
       <p className="muted">Não foi possível confirmar seu e-mail.</p>
-      <Link href="/" className="button">
-        Ir para o login
+      <Link href="/register/verify" className="button">
+        Reenviar e-mail de confirmação
       </Link>
+      <Link href="/">Ir para o login</Link>
     </div>
   );
 }

@@ -38,6 +38,9 @@ describe('VerifyEmailStatus', () => {
     expect(
       await screen.findByText('Link inválido ou expirado'),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Reenviar e-mail de confirmação' }),
+    ).toHaveAttribute('href', '/register/verify');
   });
 
   it.each([
