@@ -1,48 +1,49 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 type Props = { open: boolean; onCancel: () => void; onConfirm: () => void };
 
+// <dialog> nativo: o navegador cuida do foco preso, do Esc e do backdrop.
 export function LogoutModal({ open, onCancel, onConfirm }: Props) {
-  // Esc fecha o modal (acessibilidade).
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCancel();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onCancel]);
+  const ref = useRef<HTMLDialogElement>(null);
 
-  if (!open) return null;
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
 
   return (
-    <div className="modal-overlay" onClick={onCancel}>
-      <div
-        className="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="logout-title"
-        aria-describedby="logout-desc"
-        onClick={(e) => e.stopPropagation()} // clicar dentro não fecha
-      >
-        <h2 id="logout-title">Deseja sair da sua conta?</h2>
-        <p id="logout-desc">
-          Você precisará entrar novamente para acessar suas avaliações.
-        </p>
-        <div className="modal-actions">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={onCancel}
-            autoFocus
-          >
-            Cancelar
-          </button>
-          <button type="button" className="btn btn-primary" onClick={onConfirm}>
-            Sair
-          </button>
-        </div>
+    <dialog
+      ref={ref}
+      className="modal"
+      aria-labelledby="logout-title"
+      aria-describedby="logout-desc"
+      onCancel={(e) => {
+        e.preventDefault(); // quem fecha é o estado `open` do pai
+        onCancel();
+      }}
+      onClick={(e) => e.target === e.currentTarget && onCancel()} // clique no backdrop
+    >
+      <h2 id="logout-title">Deseja sair da sua conta?</h2>
+      <p id="logout-desc">
+        Você precisará entrar novamente para acessar suas avaliações.
+      </p>
+      <div className="modal-actions">
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={onCancel}
+          autoFocus
+        >
+          Cancelar
+        </button>
+        <button type="button" className="btn btn-primary" onClick={onConfirm}>
+          Sair
+        </button>
       </div>
-    </div>
+    </dialog>
   );
 }
