@@ -1,7 +1,11 @@
 import { z } from 'zod';
 
 export const registerSchema = z.object({
-  email: z.string().trim().toLowerCase().pipe(z.email('Formato de e-mail inválido')),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email('Formato de e-mail inválido')),
   username: z
     .string()
     .trim()
@@ -23,5 +27,8 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+export const verifyEmailSchema = z.object({ token: z.string().min(1) });
+
 export type RegisterDto = z.infer<typeof registerSchema>;
 export type LoginDto = z.infer<typeof loginSchema>;
+export type VerifyEmailDto = z.infer<typeof verifyEmailSchema>;

@@ -18,7 +18,6 @@ const toEntity = (row: UserRow) =>
     row.username,
     row.passwordHash,
     row.createdAt,
-    row.verificationToken,
     row.tokenExpiresAt,
   );
 
@@ -38,7 +37,9 @@ export class UserRepository {
   }
 
   async findByVerificationToken(verificationToken: string) {
-    const row = await this.prisma.user.findFirst({ where: { verificationToken } });
+    const row = await this.prisma.user.findUnique({
+      where: { verificationToken },
+    });
     return row ? toEntity(row) : null;
   }
 

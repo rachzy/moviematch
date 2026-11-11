@@ -3,8 +3,10 @@ import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import {
   loginSchema,
   registerSchema,
+  verifyEmailSchema,
   type LoginDto,
   type RegisterDto,
+  type VerifyEmailDto,
 } from './auth.schemas';
 import { AuthService } from './auth.service';
 
@@ -13,7 +15,6 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Post('register')
-  @HttpCode(201)
   register(@Body(new ZodValidationPipe(registerSchema)) body: RegisterDto) {
     return this.auth.register(body);
   }
@@ -25,8 +26,9 @@ export class AuthController {
   }
 
   @Get('verify-email')
-  @HttpCode(200)
-  verifyEmail(@Query('token') token: string) {
+  verifyEmail(
+    @Query(new ZodValidationPipe(verifyEmailSchema)) { token }: VerifyEmailDto,
+  ) {
     return this.auth.verifyEmail(token);
   }
 }
