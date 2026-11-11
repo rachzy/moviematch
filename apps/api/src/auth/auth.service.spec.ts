@@ -5,7 +5,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { hash } from 'bcryptjs';
-import { JwtService } from '@nestjs/jwt';
 import { createHash } from 'crypto';
 import type { MailService } from '../mail/mail.service';
 import { User } from '../users/user.entity';
@@ -28,17 +27,12 @@ describe('AuthService', () => {
     markEmailAsVerified: jest.fn(),
   };
   const mail = { sendVerificationEmail: jest.fn() };
-  const jwt = { sign: jest.fn().mockReturnValue('jwt-token') };
   const service = new AuthService(
     repo as unknown as UserRepository,
     mail as unknown as MailService,
-    jwt as unknown as JwtService,
   );
 
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jwt.sign.mockReturnValue('jwt-token');
-  });
+  beforeEach(() => jest.resetAllMocks());
 
   describe('register', () => {
     const dto = { email: 'a@a.com', username: 'alice', password: '12345678' };
@@ -217,15 +211,11 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('devolve JWT e usuário público com credenciais corretas', async () => {
+    it('aceita credenciais corretas', async () => {
       repo.findByEmail.mockResolvedValue(makeUser(await hash('12345678', 4)));
       await expect(
         service.login({ email: 'a@a.com', password: '12345678' }),
-      ).resolves.toEqual({
-        access_token: 'jwt-token',
-        user: { id: '1', email: 'a@a.com', username: 'alice' },
-      });
-      expect(jwt.sign).toHaveBeenCalledWith({ sub: '1', email: 'a@a.com' });
+      ).resolves.toEqual({ message: 'Login efetuado com sucesso' });
     });
 
     it('rejeita login de e-mail não verificado', async () => {
@@ -235,7 +225,6 @@ describe('AuthService', () => {
       await expect(
         service.login({ email: 'a@a.com', password: '12345678' }),
       ).rejects.toThrow(UnauthorizedException);
-      expect(jwt.sign).not.toHaveBeenCalled();
     });
 
     it('rejeita senha errada', async () => {

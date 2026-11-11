@@ -22,6 +22,7 @@ const toEntity = (row: UserRow) =>
     row.tokenExpiresAt,
   );
 
+// Único lugar que fala com o Prisma sobre usuários.
 @Injectable()
 export class UserRepository {
   constructor(private readonly prisma: PrismaService) {}

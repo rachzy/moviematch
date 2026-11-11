@@ -38,8 +38,7 @@ export class AuthController {
   @Post('resend-verification')
   @HttpCode(200)
   resendVerification(
-    @Body(new ZodValidationPipe(resendVerificationSchema))
-    body: ResendVerificationDto,
+    @Body(new ZodValidationPipe(resendVerificationSchema)) body: ResendVerificationDto,
   ) {
     return this.auth.resendVerification(body.email);
   }
