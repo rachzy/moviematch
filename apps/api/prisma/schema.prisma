@@ -15,6 +15,7 @@ model User {
   emailVerifiedAt    DateTime?
   verificationToken  String?   @unique
   tokenExpiresAt     DateTime?
+  verificationCode   String?   @unique
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 }

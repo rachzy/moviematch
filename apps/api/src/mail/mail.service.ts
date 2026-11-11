@@ -12,18 +12,21 @@ export class MailService {
       : undefined,
   });
 
-  async sendVerificationEmail(email: string, token: string) {
+  async sendVerificationEmail(email: string, token: string, code: string) {
     const wwwUrl = process.env.WWW_URL ?? 'http://localhost:3000';
     const url = `${wwwUrl}/verify-email?token=${token}`;
+    
     await this.transporter.sendMail({
       from: process.env.MAIL_FROM ?? 'noreply@moviematch.com',
       to: email,
       subject: 'Verifique o seu e-mail - MovieMatch',
       html: `
         <h1>Bem-vindo ao MovieMatch!</h1>
-        <p>Para verificar o seu e-mail, clique no link abaixo:</p>
+        <p>Seu código de verificação de 6 dígitos é:</p>
+        <h2 style="color: #4f46e5; font-size: 24px; letter-spacing: 2px;">${code}</h2>
+        <p>Ou, se preferir, clique no link abaixo para verificar diretamente:</p>
         <a href="${url}">${url}</a>
-        <p>Este link expira em 24 horas.</p>
+        <p>Este código e link expiram em 24 horas.</p>
       `,
     });
   }

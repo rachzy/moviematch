@@ -42,4 +42,10 @@ export class AuthController {
   ) {
     return this.auth.resendVerification(body.email);
   }
+
+  @Post('verify-code')
+  @HttpCode(200)
+  verifyCode(@Body() body: { code: string }) {
+    return this.auth.verifyEmailByCode(body.code);
+  }
 }

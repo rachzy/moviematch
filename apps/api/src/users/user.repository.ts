@@ -9,6 +9,7 @@ export type CreateUserData = {
   passwordHash: string;
   verificationToken?: string | null;
   tokenExpiresAt?: Date | null;
+  verificationCode?: string | null;
 };
 
 const toEntity = (row: UserRow) =>
@@ -43,26 +44,41 @@ export class UserRepository {
     return row ? toEntity(row) : null;
   }
 
+  async findByVerificationCode(verificationCode: string) {
+    const row = await this.prisma.user.findFirst({
+      where: { verificationCode },
+    });
+    return row ? toEntity(row) : null;
+  }
+
   async markEmailAsVerified(userId: string) {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
         emailVerifiedAt: new Date(),
         verificationToken: null,
+        verificationCode: null, 
         tokenExpiresAt: null,
       },
     });
   }
 
   async create(data: CreateUserData) {
-    return toEntity(await this.prisma.user.create({ data }));
+    const row = await this.prisma.user.create({ data });
+    return toEntity(row);
   }
 
-  async updateVerificationToken(userId: string, verificationToken: string, tokenExpiresAt: Date) {
+  async updateVerificationToken(
+    userId: string,
+    verificationToken: string,
+    verificationCode: string,
+    tokenExpiresAt: Date,
+  ) {
     return this.prisma.user.update({
       where: { id: userId },
       data: {
         verificationToken,
+        verificationCode,
         tokenExpiresAt,
       },
     });

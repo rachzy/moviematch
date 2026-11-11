@@ -46,16 +46,18 @@ export class AuthService {
     }
     const passwordHash = await hash(password, 10);
     const token = randomBytes(32).toString('hex');
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
     const user = await this.users.create({
       email,
       username,
       passwordHash,
       verificationToken: hashToken(token),
+      verificationCode: hashToken(code),
       tokenExpiresAt: new Date(Date.now() + TOKEN_TTL_MS),
     });
     // O usuário já existe: falha no envio não deve derrubar o cadastro.
     try {
-      await this.mail.sendVerificationEmail(email, token);
+      await this.mail.sendVerificationEmail(email, token, code);
     } catch (err) {
       this.logger.error('Falha ao enviar e-mail de verificação', err);
     }
@@ -87,17 +89,35 @@ export class AuthService {
     }
 
     const token = randomBytes(32).toString('hex');
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); 
     const tokenExpiresAt = new Date(Date.now() + TOKEN_TTL_MS);
 
-    await this.users.updateVerificationToken(user.id, hashToken(token), tokenExpiresAt);
+    await this.users.updateVerificationToken(
+      user.id, 
+      hashToken(token), 
+      hashToken(code), 
+      tokenExpiresAt
+    );
 
     try {
-      await this.mail.sendVerificationEmail(email, token);
+      await this.mail.sendVerificationEmail(email, token, code);
     } catch (err) {
       this.logger.error('Falha ao reenviar e-mail de verificação', err);
       throw new BadRequestException('Não foi possível enviar o e-mail. Tente novamente mais tarde.');
     }
 
     return { message: 'E-mail de verificação reenviado com sucesso!' };
+  }
+
+  async verifyEmailByCode(code: string) {
+    const hashedCode = hashToken(code);
+    const user = await this.users.findByVerificationCode(hashedCode);
+
+    if (!user?.tokenExpiresAt || user.tokenExpiresAt < new Date()) {
+      throw new BadRequestException('Código inválido ou expirado');
+    }
+
+    await this.users.markEmailAsVerified(user.id);
+    return { message: 'E-mail verificado com sucesso!' };
   }
 }
