@@ -91,7 +91,7 @@ export function LoginForm() {
         />
       </div>
 
-      <button type="submit" className="btn-primary" disabled={loading}>
+      <button type="submit" className="btn btn-primary" disabled={loading}>
         {loading ? 'Entrando…' : 'Entrar'}
       </button>
 
