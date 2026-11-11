@@ -57,3 +57,35 @@ main {
 .auth .error {
   color: #f87171;
 }
+.auth .field {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+}
+.auth input[aria-invalid='true'] {
+  border-color: #f87171;
+}
+.auth .field-error {
+  color: #f87171;
+  font-size: 14px;
+}
+.auth .alert {
+  padding: 12px;
+  border: 1px solid #f87171;
+  border-radius: 8px;
+  color: #f87171;
+  background: #f8717120;
+  font-size: 14px;
+}
+.auth .muted {
+  color: #a1a1aa;
+  font-size: 14px;
+}
+.auth .button {
+  padding: 12px;
+  border-radius: 8px;
+  color: #0f0f14;
+  background: #f472b6;
+  font-weight: 600;
+  text-decoration: none;
+}
