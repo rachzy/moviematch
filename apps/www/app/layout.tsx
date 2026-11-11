@@ -1,18 +1,21 @@
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { AuthProvider } from '@/features/auth/AuthContext';
 import './globals.css';
 
-export const metadata = {
+const inter = Inter({ subsets: ['latin'], weight: ['400', '600'], variable: '--font-inter' });
+
+export const metadata: Metadata = {
   title: 'MovieMatch',
   description: 'Conecte-se com quem tem o mesmo gosto para filmes e séries.',
 };
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+ 
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <body>{children}</body>
+    <html lang="pt-BR" className={inter.variable}>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
