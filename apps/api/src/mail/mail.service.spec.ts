@@ -15,7 +15,7 @@ describe('MailService', () => {
     delete process.env.MAIL_USER;
     delete process.env.MAIL_PASSWORD;
     delete process.env.MAIL_FROM;
-    delete process.env.API_URL;
+    delete process.env.WWW_URL;
   });
   afterAll(() => {
     process.env = env;
@@ -44,7 +44,7 @@ describe('MailService', () => {
   });
 
   it('envia o link de verificação para o destinatário', async () => {
-    process.env.API_URL = 'https://api.moviematch.com';
+    process.env.WWW_URL = 'https://moviematch.com';
     process.env.MAIL_FROM = 'no@mm.com';
 
     await new MailService().sendVerificationEmail('a@a.com', 'tok123');
@@ -53,7 +53,7 @@ describe('MailService', () => {
     expect(mail.to).toBe('a@a.com');
     expect(mail.from).toBe('no@mm.com');
     expect(mail.html).toContain(
-      'https://api.moviematch.com/auth/verify-email?token=tok123',
+      'https://moviematch.com/verify-email?token=tok123',
     );
   });
 

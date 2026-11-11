@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://moviematch:${POSTGRES_PASSWORD:-moviematch}@db:5432/moviematch
-      API_URL: ${API_URL:-http://localhost:3001}
+      WWW_URL: ${WWW_URL:-http://localhost:3000}
       MAIL_HOST: ${MAIL_HOST:-}
       MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USER: ${MAIL_USER:-}
