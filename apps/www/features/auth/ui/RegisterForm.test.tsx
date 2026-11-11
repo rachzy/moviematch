@@ -76,9 +76,9 @@ describe('RegisterForm', () => {
     render(<RegisterForm />);
     await fill('a@b.co', 'abc', 'password1');
 
-    expect(await screen.findByText('E-mail já cadastrado')).toHaveClass(
-      'field-error',
-    );
+    expect(
+      await screen.findByText('Este e-mail já está cadastrado.'),
+    ).toBeInTheDocument();
     expect(push).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Cadastrar' })).toBeEnabled();
   });
@@ -88,9 +88,7 @@ describe('RegisterForm', () => {
     render(<RegisterForm />);
     await fill('a@b.co', 'abc', 'password1');
 
-    expect(await screen.findByText('Username já em uso')).toHaveClass(
-      'field-error',
-    );
+    expect(await screen.findByText('Username já em uso.')).toBeInTheDocument();
   });
 
   it('409 desconhecido vira alerta geral', async () => {

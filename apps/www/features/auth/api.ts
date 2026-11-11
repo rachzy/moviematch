@@ -17,3 +17,10 @@ export async function verifyEmail(token: string) {
   });
   return data;
 }
+
+export function logoutUser() {
+  // Remove o token salvo no navegador
+  localStorage.removeItem('@moviematch:token');
+  // Redireciona para a tela de login
+  window.location.href = '/';
+}

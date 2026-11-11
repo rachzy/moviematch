@@ -3,44 +3,43 @@
 import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent, type InputHTMLAttributes } from 'react';
+import {
+  useId,
+  useState,
+  type FormEvent,
+  type InputHTMLAttributes,
+} from 'react';
 import { register } from '../api';
-
-type Errors = { email?: string; username?: string; password?: string };
-
-function validate(email: string, username: string, password: string) {
-  const errors: Errors = {};
-
-  if (!email) errors.email = 'Informe seu e-mail.';
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    errors.email = 'Digite um e-mail válido.';
-
-  if (!username) errors.username = 'Informe um username.';
-  else if (username.length < 3 || username.length > 30)
-    errors.username = 'O username deve ter de 3 a 30 caracteres.';
-
-  if (!password) errors.password = 'Crie uma senha.';
-  else if (password.length < 8)
-    errors.password = 'A senha deve ter no mínimo 8 caracteres.';
-
-  return errors;
-}
+import { validateRegister, type RegisterErrors } from '../validation';
 
 function Field({
   label,
   error,
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string }) {
+  const id = useId();
+  const errorId = `${id}-error`;
   return (
     <div className="field-group">
-      <label className="field-label">{label}</label>
+      <label className="field-label" htmlFor={id}>
+        {label}
+      </label>
       <input
         {...props}
+        id={id}
         aria-invalid={!!error}
+        aria-describedby={error ? errorId : undefined}
         className={`text-input ${error ? 'input-error' : ''}`}
       />
       {error && (
-        <span style={{ color: 'var(--error)', fontSize: '0.825rem', marginTop: '4px' }}>
+        <span
+          id={errorId}
+          style={{
+            color: 'var(--error)',
+            fontSize: '0.825rem',
+            marginTop: '4px',
+          }}
+        >
           {error}
         </span>
       )}
@@ -50,7 +49,7 @@ function Field({
 
 export function RegisterForm() {
   const router = useRouter();
-  const [errors, setErrors] = useState<Errors>({});
+  const [errors, setErrors] = useState<RegisterErrors>({});
   const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -63,7 +62,7 @@ export function RegisterForm() {
     const username = String(form.get('username')).trim();
     const password = String(form.get('password'));
 
-    const found = validate(email, username, password);
+    const found = validateRegister(email, username, password);
     setErrors(found);
     if (Object.keys(found).length > 0) return;
 
@@ -74,11 +73,11 @@ export function RegisterForm() {
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
         const message = String(err.response.data.message ?? '');
-        if (message.toLowerCase().includes('email') || message.toLowerCase().includes('e-mail')) {
+        if (message.startsWith('E-mail'))
           setErrors({ email: 'Este e-mail já está cadastrado.' });
-        } else {
+        else if (message.startsWith('Username'))
           setErrors({ username: 'Username já em uso.' });
-        }
+        else setFormError(message || 'Algo deu errado. Tente novamente.');
       } else {
         setFormError('Algo deu errado. Tente novamente em instantes.');
       }
@@ -98,9 +97,12 @@ export function RegisterForm() {
           </div>
 
           <div className="brand-hero">
-            <h1 className="brand-hero-title">Encontre quem tem o mesmo gosto para filmes.</h1>
+            <h1 className="brand-hero-title">
+              Encontre quem tem o mesmo gosto para filmes.
+            </h1>
             <p className="brand-hero-subtitle">
-              Avalie o que você assistiu e conecte-se com pessoas de gosto parecido.
+              Avalie o que você assistiu e conecte-se com pessoas de gosto
+              parecido.
             </p>
 
             <div className="match-badge">
@@ -112,7 +114,12 @@ export function RegisterForm() {
 
         <div className="posters-row">
           <div className="poster-item">
-            <div className="poster-card" style={{ background: 'linear-gradient(135deg, #1E3A8A, #3B82F6)' }}>
+            <div
+              className="poster-card"
+              style={{
+                background: 'linear-gradient(135deg, #1E3A8A, #3B82F6)',
+              }}
+            >
               <div className="poster-circle" />
               <div className="poster-waves" />
             </div>
@@ -122,7 +129,12 @@ export function RegisterForm() {
           </div>
 
           <div className="poster-item">
-            <div className="poster-card" style={{ background: 'linear-gradient(135deg, #D97706, #F59E0B)' }}>
+            <div
+              className="poster-card"
+              style={{
+                background: 'linear-gradient(135deg, #D97706, #F59E0B)',
+              }}
+            >
               <div className="poster-circle" />
               <div className="poster-waves" />
             </div>
@@ -132,16 +144,19 @@ export function RegisterForm() {
           </div>
 
           <div className="poster-item">
-            <div className="poster-card" style={{ background: 'linear-gradient(135deg, #059669, #10B981)' }}>
+            <div
+              className="poster-card"
+              style={{
+                background: 'linear-gradient(135deg, #059669, #10B981)',
+              }}
+            >
               <div className="poster-circle" />
               <div className="poster-waves" />
             </div>
           </div>
         </div>
 
-        <div className="brand-footer">
-          © 2026 MovieMatch
-        </div>
+        <div className="brand-footer">© 2026 MovieMatch</div>
       </div>
 
       {/* Coluna do Formulário (Direita) */}
@@ -177,7 +192,12 @@ export function RegisterForm() {
               error={errors.password}
             />
 
-            <button type="submit" className="btn-primary" disabled={loading} style={{ marginTop: '12px' }}>
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={loading}
+              style={{ marginTop: '12px' }}
+            >
               {loading ? 'Cadastrando...' : 'Cadastrar'}
             </button>
           </form>
