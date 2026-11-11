@@ -1,4 +1,4 @@
-import { CheckEmailNotice } from '@/features/auth/ui/CheckEmailNotice';
+   import { EmailCodeForm } from '@/features/auth/ui/EmailCodeForm';
 
 export default async function VerifyPage({
   searchParams,
@@ -9,7 +9,6 @@ export default async function VerifyPage({
 
   return (
     <main>
-      <CheckEmailNotice email={email} />
-    </main>
+     <EmailCodeForm email={email} />    </main>
   );
 }
