@@ -5,14 +5,34 @@
   max-width: 360px;
   padding: 32px;
   border-radius: 16px;
-  background: #ffffff10;
+  background: var(--surface);
+  border: 1px solid var(--border);
   text-align: center;
 }
 .auth h1 span,
 .auth a {
-  color: var(--accent);
+  color: var(--link-dark);
 }
 .auth .muted {
-  color: var(--muted);
+  color: var(--text-secondary);
   font-size: 14px;
+}
+.auth .ok {
+  color: var(--success);
+}
+.auth .error {
+  color: var(--error);
+}
+
+.card-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.verified-notice {
+  margin-bottom: 16px;
+  color: var(--success);
+  text-align: center;
 }
