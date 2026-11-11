@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAxiosError } from 'axios';
+import { POST_LOGIN_PATH } from '../routes';
 import { useAuth } from './AuthContext';
+
+const EMAIL_RE = /^\S+@\S+\.\S+$/;
 
 export function LoginForm() {
   const { login, token, ready } = useAuth();
@@ -13,7 +16,7 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (ready && token) router.replace('/home');
+    if (ready && token) router.replace(POST_LOGIN_PATH);
   }, [ready, token, router]);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -28,16 +31,24 @@ export function LoginForm() {
       return;
     }
 
+    if (!EMAIL_RE.test(email)) {
+      setError('Informe um e-mail válido.');
+      return;
+    }
+
     setLoading(true);
     try {
-      await login(email, password);
-      router.replace('/home');
+      await login(email, password); // o useEffect acima redireciona ao salvar o token
     } catch (err) {
-      const invalid = isAxiosError(err) && err.response?.status === 401;
+      const res = isAxiosError(err) ? err.response : undefined;
+      const apiMessage = res?.data?.message;
+      const isClientError = res && res.status >= 400 && res.status < 500;
       setError(
-        invalid
-          ? 'E-mail ou senha incorretos.'
-          : 'Não foi possível entrar agora. Tente novamente em instantes.',
+        isClientError && typeof apiMessage === 'string'
+          ? apiMessage // ex.: 403 "e-mail não verificado"
+          : res?.status === 401
+            ? 'E-mail ou senha incorretos.'
+            : 'Não foi possível entrar agora. Tente novamente em instantes.',
       );
     } finally {
       setLoading(false);
@@ -58,6 +69,8 @@ export function LoginForm() {
           type="email"
           placeholder="ana@email.com"
           autoComplete="email"
+          aria-invalid={!!error}
+          aria-describedby={error ? 'login-error' : undefined}
           className={`text-input ${error ? 'input-error' : ''}`}
         />
       </div>
@@ -72,6 +85,8 @@ export function LoginForm() {
           type="password"
           placeholder="••••••••"
           autoComplete="current-password"
+          aria-invalid={!!error}
+          aria-describedby={error ? 'login-error' : undefined}
           className={`text-input ${error ? 'input-error' : ''}`}
         />
       </div>
@@ -81,7 +96,7 @@ export function LoginForm() {
       </button>
 
       {error && (
-        <div className="error-banner" role="alert">
+        <div id="login-error" className="error-banner" role="alert">
           {error}
         </div>
       )}
