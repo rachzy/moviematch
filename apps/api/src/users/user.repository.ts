@@ -12,6 +12,7 @@ export type CreateUserData = {
 const toEntity = (row: UserRow) =>
   new User(row.id, row.email, row.username, row.passwordHash, row.createdAt);
 
+// Único lugar que fala com o Prisma sobre usuários.
 @Injectable()
 export class UserRepository {
   constructor(private readonly prisma: PrismaService) {}
