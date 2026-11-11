@@ -1,4 +1,8 @@
-import { registerSchema, verifyEmailSchema } from './auth.schemas';
+import {
+  registerSchema,
+  verifyCodeSchema,
+  verifyEmailSchema,
+} from './auth.schemas';
 
 const valid = { email: 'A@a.com ', username: 'alice_1', password: 'Abcdef1!' };
 
@@ -43,5 +47,28 @@ describe('verifyEmailSchema', () => {
 
   it.each([{}, { token: '' }])('rejeita %p', (query) => {
     expect(verifyEmailSchema.safeParse(query).success).toBe(false);
+  });
+});
+
+describe('verifyCodeSchema', () => {
+  it('aceita e-mail e código de 6 dígitos', () => {
+    expect(
+      verifyCodeSchema.parse({ email: ' A@a.com', code: '012345' }),
+    ).toEqual({ email: 'a@a.com', code: '012345' });
+  });
+
+  it.each(['12345', '1234567', 'abcdef', '12 456', 123456, undefined])(
+    'rejeita código %p',
+    (code) => {
+      expect(
+        verifyCodeSchema.safeParse({ email: 'a@a.com', code }).success,
+      ).toBe(false);
+    },
+  );
+
+  it('rejeita e-mail inválido', () => {
+    expect(
+      verifyCodeSchema.safeParse({ email: 'x', code: '123456' }).success,
+    ).toBe(false);
   });
 });

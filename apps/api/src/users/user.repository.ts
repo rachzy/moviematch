@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { User as UserRow } from '@prisma/client';
+import { Prisma, type User as UserRow } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from './user.entity';
 
@@ -10,7 +10,15 @@ export type CreateUserData = {
   verificationToken?: string | null;
   tokenExpiresAt?: Date | null;
   verificationCode?: string | null;
+  verificationSentAt?: Date | null;
 };
+
+// Violação de unicidade (e-mail/username) vinda do banco, p.ex. cadastro simultâneo.
+export class DuplicateUserError extends Error {
+  constructor(readonly field: 'email' | 'username') {
+    super(`${field} já cadastrado`);
+  }
+}
 
 const toEntity = (row: UserRow) =>
   new User(
@@ -19,7 +27,11 @@ const toEntity = (row: UserRow) =>
     row.username,
     row.passwordHash,
     row.createdAt,
+    row.emailVerifiedAt,
     row.tokenExpiresAt,
+    row.verificationCode,
+    row.codeAttempts,
+    row.verificationSentAt,
   );
 
 // Único lugar que fala com o Prisma sobre usuários.
@@ -44,13 +56,6 @@ export class UserRepository {
     return row ? toEntity(row) : null;
   }
 
-  async findByVerificationCode(verificationCode: string) {
-    const row = await this.prisma.user.findFirst({
-      where: { verificationCode },
-    });
-    return row ? toEntity(row) : null;
-  }
-
   async markEmailAsVerified(userId: string) {
     await this.prisma.user.update({
       where: { id: userId },
@@ -59,13 +64,42 @@ export class UserRepository {
         verificationToken: null,
         verificationCode: null,
         tokenExpiresAt: null,
+        codeAttempts: 0,
       },
     });
   }
 
+  // Soma uma tentativa errada de código e devolve o total.
+  async incrementCodeAttempts(userId: string) {
+    const row = await this.prisma.user.update({
+      where: { id: userId },
+      data: { codeAttempts: { increment: 1 } },
+    });
+    return row.codeAttempts;
+  }
+
+  async invalidateCode(userId: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { verificationCode: null },
+    });
+  }
+
   async create(data: CreateUserData) {
-    const row = await this.prisma.user.create({ data });
-    return toEntity(row);
+    try {
+      return toEntity(await this.prisma.user.create({ data }));
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        const target = String(err.meta?.target);
+        throw new DuplicateUserError(
+          target.includes('username') ? 'username' : 'email',
+        );
+      }
+      throw err;
+    }
   }
 
   async updateVerificationToken(
@@ -74,12 +108,14 @@ export class UserRepository {
     verificationCode: string,
     tokenExpiresAt: Date,
   ) {
-    return this.prisma.user.update({
+    await this.prisma.user.update({
       where: { id: userId },
       data: {
         verificationToken,
         verificationCode,
         tokenExpiresAt,
+        codeAttempts: 0,
+        verificationSentAt: new Date(),
       },
     });
   }

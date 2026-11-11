@@ -1,6 +1,7 @@
+import { Prisma } from '@prisma/client';
 import type { PrismaService } from '../prisma/prisma.service';
 import { User } from './user.entity';
-import { UserRepository } from './user.repository';
+import { DuplicateUserError, UserRepository } from './user.repository';
 
 const row = {
   id: '1',
@@ -9,6 +10,9 @@ const row = {
   passwordHash: 'h',
   emailVerifiedAt: null,
   verificationToken: 'hash',
+  verificationCode: null,
+  codeAttempts: 0,
+  verificationSentAt: null,
   tokenExpiresAt: new Date('2030-01-01'),
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -71,5 +75,37 @@ describe('UserRepository', () => {
       email: 'a@a.com',
       username: 'alice',
     });
+  });
+
+  it('create converte P2002 em DuplicateUserError com o campo', async () => {
+    prisma.user.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('dup', {
+        code: 'P2002',
+        clientVersion: 'x',
+        meta: { target: ['username'] },
+      }),
+    );
+    const err = await repo
+      .create({ email: 'a@a.com', username: 'alice', passwordHash: 'h' })
+      .catch((e) => e);
+    expect(err).toBeInstanceOf(DuplicateUserError);
+    expect(err.field).toBe('username');
+  });
+
+  it('updateVerificationToken devolve void e zera tentativas', async () => {
+    prisma.user.update.mockResolvedValue(row);
+    const result = await repo.updateVerificationToken(
+      '1',
+      't',
+      'c',
+      new Date(),
+    );
+    expect(result).toBeUndefined();
+    expect(prisma.user.update.mock.calls[0][0].data.codeAttempts).toBe(0);
+  });
+
+  it('incrementCodeAttempts devolve o total', async () => {
+    prisma.user.update.mockResolvedValue({ ...row, codeAttempts: 3 });
+    await expect(repo.incrementCodeAttempts('1')).resolves.toBe(3);
   });
 });
