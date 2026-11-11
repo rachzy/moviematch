@@ -2,18 +2,23 @@ import { AxiosError } from 'axios';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { register } from '../api';
+import { savePendingEmail } from '../pendingEmail';
 import { RegisterForm } from './RegisterForm';
 
 const push = vi.fn();
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 vi.mock('../api', () => ({ register: vi.fn() }));
+vi.mock('../pendingEmail', () => ({ savePendingEmail: vi.fn() }));
 
-function conflict(message: string) {
+function httpError(status: number, data: unknown) {
   return new AxiosError('x', 'ERR', undefined, undefined, {
-    status: 409,
-    data: { message },
+    status,
+    data,
   } as never);
 }
+
+const conflict = (message: string, field?: string) =>
+  httpError(409, { message, field });
 
 async function fill(email: string, username: string, password: string) {
   const user = userEvent.setup();
@@ -55,11 +60,7 @@ describe('RegisterForm', () => {
   });
 
   it('cadastra e redireciona para a tela de verificação', async () => {
-    vi.mocked(register).mockResolvedValue({
-      id: '1',
-      email: 'a@b.co',
-      username: 'abc',
-    });
+    vi.mocked(register).mockResolvedValue({ message: 'ok' });
     render(<RegisterForm />);
     await fill('  a@b.co ', ' abc ', 'password1');
 
@@ -68,11 +69,12 @@ describe('RegisterForm', () => {
       username: 'abc',
       password: 'password1',
     });
-    expect(push).toHaveBeenCalledWith('/register/verify?email=a%40b.co');
+    expect(savePendingEmail).toHaveBeenCalledWith('a@b.co');
+    expect(push).toHaveBeenCalledWith('/register/verify');
   });
 
   it('409 de e-mail aparece no campo e-mail', async () => {
-    vi.mocked(register).mockRejectedValue(conflict('E-mail já cadastrado'));
+    vi.mocked(register).mockRejectedValue(conflict('qualquer texto', 'email'));
     render(<RegisterForm />);
     await fill('a@b.co', 'abc', 'password1');
 
@@ -84,7 +86,9 @@ describe('RegisterForm', () => {
   });
 
   it('409 de username aparece no campo username', async () => {
-    vi.mocked(register).mockRejectedValue(conflict('Username já em uso'));
+    vi.mocked(register).mockRejectedValue(
+      conflict('qualquer texto', 'username'),
+    );
     render(<RegisterForm />);
     await fill('a@b.co', 'abc', 'password1');
 
@@ -97,6 +101,43 @@ describe('RegisterForm', () => {
     await fill('a@b.co', 'abc', 'password1');
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Outra coisa');
+  });
+
+  it('400 com issues do zod mostra a primeira mensagem no campo', async () => {
+    vi.mocked(register).mockRejectedValue(
+      httpError(400, [
+        {
+          path: ['password'],
+          message: 'A senha deve conter pelo menos um número',
+        },
+      ]),
+    );
+    render(<RegisterForm />);
+    await fill('a@b.co', 'abc', 'Password!');
+
+    expect(
+      await screen.findByText('A senha deve conter pelo menos um número'),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/Senha/)).toHaveFocus();
+  });
+
+  it('400 sem campo conhecido vira alerta geral', async () => {
+    vi.mocked(register).mockRejectedValue(
+      httpError(400, [{ path: [], message: 'Dados inválidos' }]),
+    );
+    render(<RegisterForm />);
+    await fill('a@b.co', 'abc', 'password1');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Dados inválidos',
+    );
+  });
+
+  it('foca o primeiro campo com erro', async () => {
+    render(<RegisterForm />);
+    await fill('', 'abc', '');
+
+    expect(screen.getByLabelText('E-mail')).toHaveFocus();
   });
 
   it('erro genérico mostra alerta', async () => {

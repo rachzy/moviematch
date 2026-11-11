@@ -4,13 +4,17 @@ import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
+  useEffect,
   useId,
+  useRef,
   useState,
   type FormEvent,
   type InputHTMLAttributes,
 } from 'react';
 import { register } from '../api';
+import { savePendingEmail } from '../pendingEmail';
 import { validateRegister, type RegisterErrors } from '../validation';
+import './register.css';
 
 function Field({
   label,
@@ -32,14 +36,7 @@ function Field({
         className={`text-input ${error ? 'input-error' : ''}`}
       />
       {error && (
-        <span
-          id={errorId}
-          style={{
-            color: 'var(--error)',
-            fontSize: '0.825rem',
-            marginTop: '4px',
-          }}
-        >
+        <span id={errorId} className="field-error">
           {error}
         </span>
       )}
@@ -52,6 +49,14 @@ export function RegisterForm() {
   const [errors, setErrors] = useState<RegisterErrors>({});
   const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // leva o foco ao primeiro campo com erro
+  useEffect(() => {
+    formRef.current
+      ?.querySelector<HTMLInputElement>('[aria-invalid="true"]')
+      ?.focus();
+  }, [errors]);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -69,15 +74,26 @@ export function RegisterForm() {
     setLoading(true);
     try {
       await register({ email, username, password });
-      router.push(`/register/verify?email=${encodeURIComponent(email)}`);
+      savePendingEmail(email);
+      router.push('/register/verify');
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 409) {
-        const message = String(err.response.data.message ?? '');
-        if (message.startsWith('E-mail'))
+      const res = axios.isAxiosError(err) ? err.response : undefined;
+      if (res?.status === 409) {
+        if (res.data?.field === 'email')
           setErrors({ email: 'Este e-mail já está cadastrado.' });
-        else if (message.startsWith('Username'))
+        else if (res.data?.field === 'username')
           setErrors({ username: 'Username já em uso.' });
-        else setFormError(message || 'Algo deu errado. Tente novamente.');
+        else
+          setFormError(
+            res.data?.message || 'Algo deu errado. Tente novamente.',
+          );
+      } else if (res?.status === 400 && Array.isArray(res.data)) {
+        // issues do zod: mostra a primeira, no campo quando houver
+        const { path, message } = res.data[0] ?? {};
+        const field = path?.[0];
+        if (field === 'email' || field === 'username' || field === 'password')
+          setErrors({ [field]: message });
+        else setFormError(message || 'Dados inválidos.');
       } else {
         setFormError('Algo deu errado. Tente novamente em instantes.');
       }
@@ -114,12 +130,7 @@ export function RegisterForm() {
 
         <div className="posters-row">
           <div className="poster-item">
-            <div
-              className="poster-card"
-              style={{
-                background: 'linear-gradient(135deg, #1E3A8A, #3B82F6)',
-              }}
-            >
+            <div className="poster-card poster-blue">
               <div className="poster-circle" />
               <div className="poster-waves" />
             </div>
@@ -129,12 +140,7 @@ export function RegisterForm() {
           </div>
 
           <div className="poster-item">
-            <div
-              className="poster-card"
-              style={{
-                background: 'linear-gradient(135deg, #D97706, #F59E0B)',
-              }}
-            >
+            <div className="poster-card poster-orange">
               <div className="poster-circle" />
               <div className="poster-waves" />
             </div>
@@ -144,12 +150,7 @@ export function RegisterForm() {
           </div>
 
           <div className="poster-item">
-            <div
-              className="poster-card"
-              style={{
-                background: 'linear-gradient(135deg, #059669, #10B981)',
-              }}
-            >
+            <div className="poster-card poster-green">
               <div className="poster-circle" />
               <div className="poster-waves" />
             </div>
@@ -170,7 +171,7 @@ export function RegisterForm() {
             </div>
           )}
 
-          <form onSubmit={onSubmit} noValidate>
+          <form ref={formRef} onSubmit={onSubmit} noValidate>
             <Field
               label="E-mail"
               name="email"
@@ -188,15 +189,14 @@ export function RegisterForm() {
               label="Senha"
               name="password"
               type="password"
-              placeholder="••••••••"
+              placeholder="Mín. 8, com maiúscula, minúscula, número e especial"
               error={errors.password}
             />
 
             <button
               type="submit"
-              className="btn-primary"
+              className="btn-primary btn-submit"
               disabled={loading}
-              style={{ marginTop: '12px' }}
             >
               {loading ? 'Cadastrando...' : 'Cadastrar'}
             </button>
