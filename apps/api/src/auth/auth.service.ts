@@ -68,6 +68,36 @@ export class AuthService {
     if (!user || !(await compare(password, user.passwordHash))) {
       throw new UnauthorizedException('E-mail ou senha inválidos');
     }
+
+    if (user.tokenExpiresAt !== null) {
+      throw new UnauthorizedException('Por favor, verifique o seu e-mail antes de fazer login.');
+    }
+
     return { message: 'Login efetuado com sucesso' };
+  }
+
+  async resendVerification(email: string) {
+    const user = await this.users.findByEmail(email);
+
+    if (!user) {
+      return { message: 'Se o e-mail estiver cadastrado, um novo link de verificação foi enviado.' };
+    }
+    if (user.tokenExpiresAt === null) {
+      throw new BadRequestException('Este e-mail já foi verificado.');
+    }
+
+    const token = randomBytes(32).toString('hex');
+    const tokenExpiresAt = new Date(Date.now() + TOKEN_TTL_MS);
+
+    await this.users.updateVerificationToken(user.id, hashToken(token), tokenExpiresAt);
+
+    try {
+      await this.mail.sendVerificationEmail(email, token);
+    } catch (err) {
+      this.logger.error('Falha ao reenviar e-mail de verificação', err);
+      throw new BadRequestException('Não foi possível enviar o e-mail. Tente novamente mais tarde.');
+    }
+
+    return { message: 'E-mail de verificação reenviado com sucesso!' };
   }
 }

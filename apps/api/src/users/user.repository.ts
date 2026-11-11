@@ -57,4 +57,14 @@ export class UserRepository {
   async create(data: CreateUserData) {
     return toEntity(await this.prisma.user.create({ data }));
   }
+
+  async updateVerificationToken(userId: string, verificationToken: string, tokenExpiresAt: Date) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        verificationToken,
+        tokenExpiresAt,
+      },
+    });
+  }
 }

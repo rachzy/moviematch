@@ -32,3 +32,8 @@ export const verifyEmailSchema = z.object({ token: z.string().min(1) });
 export type RegisterDto = z.infer<typeof registerSchema>;
 export type LoginDto = z.infer<typeof loginSchema>;
 export type VerifyEmailDto = z.infer<typeof verifyEmailSchema>;
+
+export const resendVerificationSchema = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email('Formato de e-mail inválido')),
+});
+export type ResendVerificationDto = z.infer<typeof resendVerificationSchema>;
