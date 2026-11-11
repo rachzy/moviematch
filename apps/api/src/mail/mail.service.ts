@@ -15,7 +15,7 @@ export class MailService {
   async sendVerificationEmail(email: string, token: string, code: string) {
     const wwwUrl = process.env.WWW_URL ?? 'http://localhost:3000';
     const url = `${wwwUrl}/verify-email?token=${token}`;
-    
+
     await this.transporter.sendMail({
       from: process.env.MAIL_FROM ?? 'noreply@moviematch.com',
       to: email,

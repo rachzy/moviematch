@@ -5,6 +5,7 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
 import { MailService } from '../mail/mail.service';
@@ -24,6 +25,7 @@ export class AuthService {
   constructor(
     private readonly users: UserRepository,
     private readonly mail: MailService,
+    private readonly jwt: JwtService,
   ) {}
 
   async verifyEmail(token: string) {
@@ -72,38 +74,49 @@ export class AuthService {
     }
 
     if (user.tokenExpiresAt !== null) {
-      throw new UnauthorizedException('Por favor, verifique o seu e-mail antes de fazer login.');
+      throw new UnauthorizedException(
+        'Por favor, verifique o seu e-mail antes de fazer login.',
+      );
     }
 
-    return { message: 'Login efetuado com sucesso' };
+    // Devolve o JWT; toPublic() evita expor o passwordHash.
+    return {
+      access_token: this.jwt.sign({ sub: user.id, email: user.email }),
+      user: user.toPublic(),
+    };
   }
 
   async resendVerification(email: string) {
     const user = await this.users.findByEmail(email);
 
     if (!user) {
-      return { message: 'Se o e-mail estiver cadastrado, um novo link de verificação foi enviado.' };
+      return {
+        message:
+          'Se o e-mail estiver cadastrado, um novo link de verificação foi enviado.',
+      };
     }
     if (user.tokenExpiresAt === null) {
       throw new BadRequestException('Este e-mail já foi verificado.');
     }
 
     const token = randomBytes(32).toString('hex');
-    const code = Math.floor(100000 + Math.random() * 900000).toString(); 
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
     const tokenExpiresAt = new Date(Date.now() + TOKEN_TTL_MS);
 
     await this.users.updateVerificationToken(
-      user.id, 
-      hashToken(token), 
-      hashToken(code), 
-      tokenExpiresAt
+      user.id,
+      hashToken(token),
+      hashToken(code),
+      tokenExpiresAt,
     );
 
     try {
       await this.mail.sendVerificationEmail(email, token, code);
     } catch (err) {
       this.logger.error('Falha ao reenviar e-mail de verificação', err);
-      throw new BadRequestException('Não foi possível enviar o e-mail. Tente novamente mais tarde.');
+      throw new BadRequestException(
+        'Não foi possível enviar o e-mail. Tente novamente mais tarde.',
+      );
     }
 
     return { message: 'E-mail de verificação reenviado com sucesso!' };

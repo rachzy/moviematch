@@ -47,7 +47,11 @@ describe('MailService', () => {
     process.env.WWW_URL = 'https://moviematch.com';
     process.env.MAIL_FROM = 'no@mm.com';
 
-    await new MailService().sendVerificationEmail('a@a.com', 'tok123');
+    await new MailService().sendVerificationEmail(
+      'a@a.com',
+      'tok123',
+      '123456',
+    );
 
     const mail = sendMail.mock.calls[0][0];
     expect(mail.to).toBe('a@a.com');
@@ -55,12 +59,13 @@ describe('MailService', () => {
     expect(mail.html).toContain(
       'https://moviematch.com/verify-email?token=tok123',
     );
+    expect(mail.html).toContain('123456');
   });
 
   it('propaga erro do SMTP', async () => {
     sendMail.mockRejectedValue(new Error('smtp fora'));
     await expect(
-      new MailService().sendVerificationEmail('a@a.com', 't'),
+      new MailService().sendVerificationEmail('a@a.com', 't', '1'),
     ).rejects.toThrow('smtp fora');
   });
 });

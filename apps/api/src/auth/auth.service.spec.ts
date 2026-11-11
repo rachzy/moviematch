@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { hash } from 'bcryptjs';
+import { JwtService } from '@nestjs/jwt';
 import { createHash } from 'crypto';
 import type { MailService } from '../mail/mail.service';
 import { User } from '../users/user.entity';
@@ -22,15 +23,22 @@ describe('AuthService', () => {
     findByUsername: jest.fn(),
     create: jest.fn(),
     findByVerificationToken: jest.fn(),
+    findByVerificationCode: jest.fn(),
+    updateVerificationToken: jest.fn(),
     markEmailAsVerified: jest.fn(),
   };
   const mail = { sendVerificationEmail: jest.fn() };
+  const jwt = { sign: jest.fn().mockReturnValue('jwt-token') };
   const service = new AuthService(
     repo as unknown as UserRepository,
     mail as unknown as MailService,
+    jwt as unknown as JwtService,
   );
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jwt.sign.mockReturnValue('jwt-token');
+  });
 
   describe('register', () => {
     const dto = { email: 'a@a.com', username: 'alice', password: '12345678' };
@@ -60,8 +68,11 @@ describe('AuthService', () => {
       const data = repo.create.mock.calls[0][0];
       const [to, token] = mail.sendVerificationEmail.mock.calls[0];
       expect(to).toBe('a@a.com');
+      const code = mail.sendVerificationEmail.mock.calls[0][2];
       expect(token).toHaveLength(64);
+      expect(code).toMatch(/^\d{6}$/);
       expect(data.verificationToken).toBe(sha256(token));
+      expect(data.verificationCode).toBe(sha256(code));
       const ttl = data.tokenExpiresAt.getTime() - Date.now();
       expect(ttl).toBeGreaterThan(23 * 60 * 60 * 1000);
       expect(ttl).toBeLessThanOrEqual(24 * 60 * 60 * 1000);
@@ -137,12 +148,94 @@ describe('AuthService', () => {
     });
   });
 
+  describe('verifyEmailByCode', () => {
+    it('verifica pelo hash do código', async () => {
+      repo.findByVerificationCode.mockResolvedValue(
+        makeUser('x', new Date(Date.now() + 60_000)),
+      );
+      await expect(service.verifyEmailByCode('123456')).resolves.toEqual({
+        message: 'E-mail verificado com sucesso!',
+      });
+      expect(repo.findByVerificationCode).toHaveBeenCalledWith(
+        sha256('123456'),
+      );
+      expect(repo.markEmailAsVerified).toHaveBeenCalledWith('1');
+    });
+
+    it.each([null, makeUser('x'), makeUser('x', new Date(Date.now() - 1000))])(
+      'rejeita código inexistente ou expirado (%#)',
+      async (user) => {
+        repo.findByVerificationCode.mockResolvedValue(user);
+        await expect(service.verifyEmailByCode('123456')).rejects.toThrow(
+          BadRequestException,
+        );
+        expect(repo.markEmailAsVerified).not.toHaveBeenCalled();
+      },
+    );
+  });
+
+  describe('resendVerification', () => {
+    it('gera novo token/código e reenvia o e-mail', async () => {
+      repo.findByEmail.mockResolvedValue(
+        makeUser('x', new Date(Date.now() - 1000)),
+      );
+
+      await service.resendVerification('a@a.com');
+
+      const [id, tokenHash, codeHash, expiresAt] =
+        repo.updateVerificationToken.mock.calls[0];
+      const [, token, code] = mail.sendVerificationEmail.mock.calls[0];
+      expect(id).toBe('1');
+      expect(tokenHash).toBe(sha256(token));
+      expect(codeHash).toBe(sha256(code));
+      expect(expiresAt.getTime()).toBeGreaterThan(Date.now());
+    });
+
+    it('não revela se o e-mail existe', async () => {
+      repo.findByEmail.mockResolvedValue(null);
+      await expect(
+        service.resendVerification('x@x.com'),
+      ).resolves.toHaveProperty('message');
+      expect(mail.sendVerificationEmail).not.toHaveBeenCalled();
+    });
+
+    it('rejeita e-mail já verificado', async () => {
+      repo.findByEmail.mockResolvedValue(makeUser('x'));
+      await expect(service.resendVerification('a@a.com')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('avisa quando o envio falha', async () => {
+      repo.findByEmail.mockResolvedValue(makeUser('x', new Date()));
+      mail.sendVerificationEmail.mockRejectedValue(new Error('smtp fora'));
+      jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+      await expect(service.resendVerification('a@a.com')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
   describe('login', () => {
-    it('aceita credenciais corretas', async () => {
+    it('devolve JWT e usuário público com credenciais corretas', async () => {
       repo.findByEmail.mockResolvedValue(makeUser(await hash('12345678', 4)));
       await expect(
         service.login({ email: 'a@a.com', password: '12345678' }),
-      ).resolves.toEqual({ message: 'Login efetuado com sucesso' });
+      ).resolves.toEqual({
+        access_token: 'jwt-token',
+        user: { id: '1', email: 'a@a.com', username: 'alice' },
+      });
+      expect(jwt.sign).toHaveBeenCalledWith({ sub: '1', email: 'a@a.com' });
+    });
+
+    it('rejeita login de e-mail não verificado', async () => {
+      repo.findByEmail.mockResolvedValue(
+        makeUser(await hash('12345678', 4), new Date(Date.now() + 60_000)),
+      );
+      await expect(
+        service.login({ email: 'a@a.com', password: '12345678' }),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(jwt.sign).not.toHaveBeenCalled();
     });
 
     it('rejeita senha errada', async () => {

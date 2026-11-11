@@ -22,7 +22,6 @@ const toEntity = (row: UserRow) =>
     row.tokenExpiresAt,
   );
 
-// Único lugar que fala com o Prisma sobre usuários.
 @Injectable()
 export class UserRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -57,7 +56,7 @@ export class UserRepository {
       data: {
         emailVerifiedAt: new Date(),
         verificationToken: null,
-        verificationCode: null, 
+        verificationCode: null,
         tokenExpiresAt: null,
       },
     });
