@@ -1,35 +1,46 @@
 :root {
   /* Cores do Design System */
-  --bg: #0B1220;
+  --bg: #0b1220;
   --surface: #111827;
-  --surface-hover: #1F2937;
+  --surface-hover: #1f2937;
   --border: #334155;
-  --focus: #2563EB;
-  --error: #F87171;
+  --focus: #2563eb;
+  --error: #f87171;
   --error-bg: rgba(248, 113, 113, 0.1);
-  --primary: #2563EB;
-  --primary-hover: #1D4ED8;
-  --link-dark: #60A5FA;
-  --stars: #F59E0B;
-  --success: #22C55E;
-  --text: #F1F5F9;
-  --text-primary: #F1F5F9;
-  --text-secondary: #94A3B8;
-  --text-support: #CBD5E1;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --link-dark: #60a5fa;
+  --stars: #f59e0b;
+  --success: #22c55e;
+  --text: #f1f5f9;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-support: #cbd5e1;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
   height: 100%;
-  overflow-x: hidden; }
+  overflow-x: hidden;
+}
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-inter), system-ui, sans-serif;
   font-weight: 400;
 }
-a { color: var(--link-dark); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a {
+  color: var(--link-dark);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
 
 /* ---------- PÁGINA DE CADASTRO ---------- */
 main {
@@ -49,7 +60,9 @@ main {
   background: #ffffff10;
   text-align: center;
 }
-.auth h1 span { color: #f472b6; }
+.auth h1 span {
+  color: #f472b6;
+}
 .auth input {
   padding: 12px;
   border: 1px solid #ffffff30;
@@ -68,20 +81,30 @@ main {
   font-weight: 600;
   cursor: pointer;
 }
-.auth a { color: #f472b6; }
-.auth .ok { color: #4ade80; }
-.auth .error { color: #f87171; }
+.auth a {
+  color: #f472b6;
+}
+.auth .ok {
+  color: #4ade80;
+}
+.auth .error {
+  color: #f87171;
+}
 
 /* ---------- BOTÕES GERAIS E MODAL ---------- */
 .btn {
-  font: inherit; font-weight: 600; cursor: pointer;
-  padding: 10px 18px; border-radius: 8px; border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid transparent;
 }
 .btn-primary {
   width: 100%;
   height: 44px;
   background: var(--primary);
-  color: #FFFFFF;
+  color: #ffffff;
   border: none;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -92,10 +115,21 @@ main {
   justify-content: center;
   transition: background-color 0.2s;
 }
-.btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
-.btn-primary:disabled { opacity: .65; cursor: not-allowed; }
-.btn-secondary { background: transparent; color: var(--text); border-color: var(--border); }
-.btn-secondary:hover { border-color: var(--text-secondary); }
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+.btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+.btn-secondary:hover {
+  border-color: var(--text-secondary);
+}
 
 /* ---------- LOGIN DO MOVEMATCH (DUAS COLUNAS) ---------- */
 .login-container {
@@ -108,7 +142,12 @@ main {
 
 .brand-column {
   position: relative;
-  background: radial-gradient(circle at top left, #2563EB 0%, #1E3A8A 35%, #0B1220 85%);
+  background: radial-gradient(
+    circle at top left,
+    #2563eb 0%,
+    #1e3a8a 35%,
+    #0b1220 85%
+  );
   padding: 36px 60px 24px;
   display: flex;
   flex-direction: column;
@@ -118,7 +157,7 @@ main {
 }
 
 .brand-column::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   right: 0;
@@ -168,7 +207,7 @@ main {
   font-size: 2.2rem;
   font-weight: 600;
   line-height: 1.25;
-  color: #FFFFFF;
+  color: #ffffff;
   max-width: 18ch;
 }
 
@@ -183,13 +222,13 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #FFFFFF;
-  color: #0B1220;
+  background: #ffffff;
+  color: #0b1220;
   font-size: 0.8rem;
   font-weight: 600;
   padding: 6px 14px;
   border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   align-self: flex-start;
 }
 
@@ -248,7 +287,7 @@ main {
   left: 0;
   right: 0;
   height: 50%;
-  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
 }
 
 .poster-rating {
@@ -351,24 +390,57 @@ main {
 
 /* ---------- ÁREA LOGADA--------- */
 .topbar {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
 }
-.private-main { display: block; min-height: auto; padding: 24px; }
+.private-main {
+  display: block;
+  min-height: auto;
+  padding: 24px;
+}
 
 .modal-overlay {
-  position: fixed; inset: 0; background: rgba(0, 0, 0, .6);
-  display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
 }
 .modal {
-  width: 100%; max-width: 420px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 12px; padding: 28px;
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
 }
-.modal h2 { margin: 0 0 8px; font-weight: 600; font-size: 1.25rem; }
-.modal p { margin: 0 0 24px; color: var(--text-secondary); }
-.modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
+.modal h2 {
+  margin: 0 0 8px;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+.modal p {
+  margin: 0 0 24px;
+  color: var(--text-secondary);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
 
 @media (max-width: 900px) {
-  .login-container { grid-template-columns: 1fr; }
-  .brand-column { display: none; }
+  .login-container {
+    grid-template-columns: 1fr;
+  }
+  .brand-column {
+    display: none;
+  }
 }

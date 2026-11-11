@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAxiosError } from 'axios';
-import { useAuth } from '../AuthContext';
+import { useAuth } from './AuthContext';
 
 export function LoginForm() {
   const { login, token, ready } = useAuth();
@@ -49,7 +49,9 @@ export function LoginForm() {
       <h2>Entrar na sua conta</h2>
 
       <div className="field-group">
-        <label htmlFor="email" className="field-label">E-mail</label>
+        <label htmlFor="email" className="field-label">
+          E-mail
+        </label>
         <input
           id="email"
           name="email"
@@ -61,7 +63,9 @@ export function LoginForm() {
       </div>
 
       <div className="field-group">
-        <label htmlFor="password" className="field-label">Senha</label>
+        <label htmlFor="password" className="field-label">
+          Senha
+        </label>
         <input
           id="password"
           name="password"

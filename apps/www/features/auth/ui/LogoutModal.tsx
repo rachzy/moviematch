@@ -26,9 +26,16 @@ export function LogoutModal({ open, onCancel, onConfirm }: Props) {
         onClick={(e) => e.stopPropagation()} // clicar dentro não fecha
       >
         <h2 id="logout-title">Deseja sair da sua conta?</h2>
-        <p id="logout-desc">Você precisará entrar novamente para acessar suas avaliações.</p>
+        <p id="logout-desc">
+          Você precisará entrar novamente para acessar suas avaliações.
+        </p>
         <div className="modal-actions">
-          <button type="button" className="btn btn-secondary" onClick={onCancel} autoFocus>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={onCancel}
+            autoFocus
+          >
             Cancelar
           </button>
           <button type="button" className="btn btn-primary" onClick={onConfirm}>
