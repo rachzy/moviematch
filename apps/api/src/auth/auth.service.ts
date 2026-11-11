@@ -1,34 +1,33 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { compare, hash } from 'bcryptjs';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { UserRepository } from '../users/user.repository';
-import type { LoginDto, RegisterDto } from './auth.schemas';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly users: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private jwtService: JwtService,
+  ) {}
 
-  async register({ email, username, password }: RegisterDto) {
-    if (await this.users.findByEmail(email)) {
-      throw new ConflictException('E-mail já cadastrado');
+  async login(dto: { email: string; password: string }) {
+    //Busca o User pelo e-mail
+    const user = await this.userRepository.findByEmail(dto.email);
+    if (!user) {
+      throw new UnauthorizedException('E-mail ou senha incorretos.');
     }
-    if (await this.users.findByUsername(username)) {
-      throw new ConflictException('Username já em uso');
-    }
-    const passwordHash = await hash(password, 10);
-    const user = await this.users.create({ email, username, passwordHash });
-    return user.toPublic();
-  }
 
-  async login({ email, password }: LoginDto) {
-    const user = await this.users.findByEmail(email);
-    // Mesma mensagem para e-mail inexistente e senha errada.
-    if (!user || !(await compare(password, user.passwordHash))) {
-      throw new UnauthorizedException('E-mail ou senha inválidos');
+    //Faz a validação da senha usando o passwordHash do domínio
+    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('E-mail ou senha incorretos.');
     }
-    return { message: 'Login efetuado com sucesso' };
+
+    //E enfim gera o Token JWT retornando ao user usando o método toPublic() da entity User para não expor o passwordHash
+    const payload = { sub: user.id, email: user.email };
+    return {
+      access_token: this.jwtService.sign(payload),
+      user: user.toPublic(),
+    };
   }
 }
