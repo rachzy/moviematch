@@ -1,14 +1,9 @@
-   import { EmailCodeForm } from '@/features/auth/ui/EmailCodeForm';
+import { VerifyCode } from '@/features/auth/ui/VerifyCode';
 
-export default async function VerifyPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ email?: string }>;
-}) {
-  const { email } = await searchParams;
-
+export default function VerifyPage() {
   return (
     <main>
-     <EmailCodeForm email={email} />    </main>
+      <VerifyCode />
+    </main>
   );
 }

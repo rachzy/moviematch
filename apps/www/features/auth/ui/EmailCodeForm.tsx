@@ -1,8 +1,10 @@
 'use client';
 
+import axios from 'axios';
 import Link from 'next/link';
 import {
   useEffect,
+  useId,
   useRef,
   useState,
   type ClipboardEvent,
@@ -12,13 +14,13 @@ import {
 import './email-code.css';
 
 const LENGTH = 6;
+const COOLDOWN = 60; // segundos entre reenvios
 
 type Props = {
   email?: string;
-  // Ainda não existe rota no backend para confirmar código.
-  // Quando existir, passe aqui a função que chama a API.
-  onConfirm?: (code: string) => Promise<void>;
-  onResend?: () => void;
+  // Devem rejeitar em caso de erro.
+  onConfirm: (code: string) => Promise<void>;
+  onResend: () => Promise<void>;
 };
 
 function LogoIcon() {
@@ -63,8 +65,7 @@ function Hero() {
       <div className="ec-hero-text">
         <h2>Encontre quem tem o mesmo gosto para filmes.</h2>
         <p>
-          Avalie o que você assistiu e conecte-se com pessoas de gosto
-          parecido.
+          Avalie o que você assistiu e conecte-se com pessoas de gosto parecido.
         </p>
       </div>
 
@@ -95,11 +96,28 @@ export function EmailCodeForm({ email, onConfirm, onResend }: Props) {
   const [digits, setDigits] = useState<string[]>(Array(LENGTH).fill(''));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [cooldown, setCooldown] = useState(0);
+  const errorId = useId();
   const refs = useRef<Array<HTMLInputElement | null>>([]);
+  const refocus = useRef(false); // refoca o 1º campo quando sair do loading
 
   useEffect(() => {
     refs.current[0]?.focus();
   }, []);
+
+  useEffect(() => {
+    if (!loading && refocus.current) {
+      refocus.current = false;
+      focusAt(0);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   function focusAt(index: number) {
     refs.current[Math.min(Math.max(index, 0), LENGTH - 1)]?.focus();
@@ -150,17 +168,37 @@ export function EmailCodeForm({ email, onConfirm, onResend }: Props) {
 
     if (code.length < LENGTH) {
       setError('Digite os 6 dígitos do código.');
+      focusAt(digits.findIndex((d) => !d));
       return;
     }
 
-    if (!onConfirm) return; // sem backend por enquanto
-
     setLoading(true);
+    setNotice('');
     try {
       await onConfirm(code);
-    } catch {
-      setError('Código incorreto ou expirado.');
+    } catch (err) {
+      const res = axios.isAxiosError(err) ? err.response : undefined;
+      setError(
+        res?.status === 400
+          ? res.data?.message || 'Código incorreto ou expirado.'
+          : 'Não foi possível verificar agora. Tente novamente.',
+      );
+      setDigits(Array(LENGTH).fill(''));
+      refocus.current = true;
       setLoading(false);
+    }
+  }
+
+  async function handleResend() {
+    setError('');
+    setNotice('');
+    try {
+      await onResend();
+      // resposta genérica: a API não revela se o e-mail existe
+      setNotice('Se o e-mail existir, enviamos um novo código.');
+      setCooldown(COOLDOWN);
+    } catch {
+      setError('Não foi possível reenviar agora. Tente novamente.');
     }
   }
 
@@ -193,6 +231,7 @@ export function EmailCodeForm({ email, onConfirm, onResend }: Props) {
                   autoComplete={i === 0 ? 'one-time-code' : 'off'}
                   aria-label={`Dígito ${i + 1} de ${LENGTH}`}
                   aria-invalid={!!error}
+                  aria-describedby={error ? errorId : undefined}
                   value={digit}
                   disabled={loading}
                   onChange={(e) => handleChange(i, e.target.value)}
@@ -203,11 +242,9 @@ export function EmailCodeForm({ email, onConfirm, onResend }: Props) {
               ))}
             </div>
 
-            {error && (
-              <p className="ec-error" role="alert">
-                {error}
-              </p>
-            )}
+            <p id={errorId} className="ec-error" role="alert">
+              {error}
+            </p>
 
             <button type="submit" className="ec-btn" disabled={loading}>
               {loading && <span className="ec-spinner" aria-hidden="true" />}
@@ -217,9 +254,17 @@ export function EmailCodeForm({ email, onConfirm, onResend }: Props) {
 
           <p className="ec-foot">
             Não recebeu?{' '}
-            <button type="button" className="ec-link" onClick={onResend}>
-              Reenviar código
+            <button
+              type="button"
+              className="ec-link"
+              onClick={handleResend}
+              disabled={loading || cooldown > 0}
+            >
+              {cooldown > 0 ? `Reenviar em ${cooldown}s` : 'Reenviar código'}
             </button>
+          </p>
+          <p className="ec-status" role="status" aria-live="polite">
+            {notice}
           </p>
           {!loading && (
             <p className="ec-foot">

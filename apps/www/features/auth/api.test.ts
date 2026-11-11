@@ -1,24 +1,39 @@
 import { http } from '@/shared/lib/http';
-import { register, verifyEmail } from './api';
+import { register, resendVerification, verifyCode, verifyEmail } from './api';
 
-vi.mock('@/shared/lib/http', () => ({ http: { post: vi.fn(), get: vi.fn() } }));
+vi.mock('@/shared/lib/http', () => ({ http: { post: vi.fn() } }));
+
+beforeEach(() => {
+  vi.mocked(http.post).mockResolvedValue({ data: { message: 'ok' } });
+});
 
 describe('auth api', () => {
-  it('register faz POST /auth/register e devolve o usuário', async () => {
-    const user = { id: '1', email: 'a@b.co', username: 'abc' };
-    vi.mocked(http.post).mockResolvedValue({ data: user });
-    const input = { email: 'a@b.co', username: 'abc', password: 'password1' };
+  it('register faz POST /auth/register', async () => {
+    const input = { email: 'a@b.co', username: 'abc', password: 'Password1!' };
 
-    await expect(register(input)).resolves.toEqual(user);
+    await expect(register(input)).resolves.toEqual({ message: 'ok' });
     expect(http.post).toHaveBeenCalledWith('/auth/register', input);
   });
 
-  it('verifyEmail faz GET /auth/verify-email com o token na query', async () => {
-    vi.mocked(http.get).mockResolvedValue({ data: { message: 'ok' } });
-
+  it('verifyEmail faz POST /auth/verify-email com o token', async () => {
     await expect(verifyEmail('tok')).resolves.toEqual({ message: 'ok' });
-    expect(http.get).toHaveBeenCalledWith('/auth/verify-email', {
-      params: { token: 'tok' },
+    expect(http.post).toHaveBeenCalledWith('/auth/verify-email', {
+      token: 'tok',
+    });
+  });
+
+  it('verifyCode faz POST /auth/verify-code com e-mail e código', async () => {
+    await verifyCode('a@b.co', '123456');
+    expect(http.post).toHaveBeenCalledWith('/auth/verify-code', {
+      email: 'a@b.co',
+      code: '123456',
+    });
+  });
+
+  it('resendVerification faz POST /auth/resend-verification', async () => {
+    await resendVerification('a@b.co');
+    expect(http.post).toHaveBeenCalledWith('/auth/resend-verification', {
+      email: 'a@b.co',
     });
   });
 });
