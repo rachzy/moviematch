@@ -1,4 +1,7 @@
 import './globals.css';
+import '@/shared/styles/card.css';
+import '@/shared/styles/form.css';
+import '@/shared/styles/button.css';
 
 export const metadata = {
   title: 'MovieMatch',

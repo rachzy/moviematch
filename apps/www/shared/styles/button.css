@@ -1,0 +1,21 @@
+.auth button,
+.auth .button {
+  padding: 12px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--on-accent);
+  background: var(--accent);
+  font: inherit;
+  font-weight: 600;
+}
+.auth button {
+  cursor: pointer;
+}
+.auth button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.auth a.button {
+  color: var(--on-accent);
+  text-decoration: none;
+}

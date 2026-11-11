@@ -1,0 +1,28 @@
+.auth input {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: inherit;
+  background: #00000040;
+  font: inherit;
+}
+.auth input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+.auth .field {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+}
+.auth .field-error {
+  color: var(--danger);
+  font-size: 14px;
+}
+.auth .alert {
+  padding: 12px;
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  color: var(--danger);
+  background: #f8717120;
+  font-size: 14px;
+}

@@ -1,0 +1,18 @@
+.auth {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 360px;
+  padding: 32px;
+  border-radius: 16px;
+  background: #ffffff10;
+  text-align: center;
+}
+.auth h1 span,
+.auth a {
+  color: var(--accent);
+}
+.auth .muted {
+  color: var(--muted);
+  font-size: 14px;
+}

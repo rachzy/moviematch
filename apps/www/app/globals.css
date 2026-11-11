@@ -1,3 +1,12 @@
+:root {
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  --accent: #f472b6;
+  --on-accent: #0f0f14;
+  --danger: #f87171;
+  --border: #ffffff30;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,7 +15,7 @@
 body {
   min-height: 100vh;
   font-family: system-ui, sans-serif;
-  color: #f4f4f5;
+  color: var(--text);
   background: radial-gradient(circle at top, #3b1d4a, #0f0f14 60%);
 }
 
@@ -15,77 +24,4 @@ main {
   place-items: center;
   min-height: 100vh;
   padding: 24px;
-}
-
-.auth {
-  display: grid;
-  gap: 16px;
-  width: 100%;
-  max-width: 360px;
-  padding: 32px;
-  border-radius: 16px;
-  background: #ffffff10;
-  text-align: center;
-}
-.auth h1 span {
-  color: #f472b6;
-}
-.auth input {
-  padding: 12px;
-  border: 1px solid #ffffff30;
-  border-radius: 8px;
-  color: inherit;
-  background: #00000040;
-  font: inherit;
-}
-.auth button {
-  padding: 12px;
-  border: 0;
-  border-radius: 8px;
-  color: #0f0f14;
-  background: #f472b6;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-.auth a {
-  color: #f472b6;
-}
-.auth .ok {
-  color: #4ade80;
-}
-.auth .error {
-  color: #f87171;
-}
-.auth .field {
-  display: grid;
-  gap: 6px;
-  text-align: left;
-}
-.auth input[aria-invalid='true'] {
-  border-color: #f87171;
-}
-.auth .field-error {
-  color: #f87171;
-  font-size: 14px;
-}
-.auth .alert {
-  padding: 12px;
-  border: 1px solid #f87171;
-  border-radius: 8px;
-  color: #f87171;
-  background: #f8717120;
-  font-size: 14px;
-}
-.auth .muted {
-  color: #a1a1aa;
-  font-size: 14px;
-}
-.auth .button {
-  padding: 12px;
-  border-radius: 8px;
-  color: #0f0f14;
-  background: #f472b6;
-  font-weight: 600;
-  text-decoration: none;
 }
