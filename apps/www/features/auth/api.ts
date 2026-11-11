@@ -10,3 +10,10 @@ export async function register(input: RegisterInput) {
   const { data } = await http.post<User>('/auth/register', input);
   return data;
 }
+
+export function logoutUser() {
+  // Remove o token salvo no navegador
+  localStorage.removeItem('@moviematch:token');
+  // Redireciona para a tela de login
+  window.location.href = '/';
+}
