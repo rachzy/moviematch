@@ -1,0 +1,47 @@
+.auth button,
+.auth .button {
+  padding: 12px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--primary);
+  font: inherit;
+  font-weight: 600;
+}
+.auth button {
+  cursor: pointer;
+}
+.auth button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.auth a.button {
+  color: #fff;
+  text-decoration: none;
+}
+
+.btn-primary {
+  width: 100%;
+  height: 44px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+.btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+.btn-submit {
+  margin-top: 12px;
+}
