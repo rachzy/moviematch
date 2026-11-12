@@ -14,14 +14,24 @@ services:
       interval: 2s
       retries: 15
 
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - '1025:1025' # Porta SMTP para o Nodemailer conectar
+      - '8025:8025' # Painel web para visualizar os e-mails enviados
+
   api:
     build: { context: .., dockerfile: docker/Dockerfile, target: dev }
     command: npm run dev -w api
     environment:
       DATABASE_URL: postgresql://moviematch:moviematch@db:5432/moviematch
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
     ports: ['3001:3001']
     volumes: ['../apps:/app/apps']
-    depends_on: { db: { condition: service_healthy } }
+    depends_on:
+      db: { condition: service_healthy }
+      mailpit: { condition: service_started }
 
   www:
     build: { context: .., dockerfile: docker/Dockerfile, target: dev }

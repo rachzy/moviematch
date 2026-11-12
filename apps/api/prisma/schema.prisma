@@ -8,10 +8,16 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  username     String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                 String    @id @default(uuid())
+  email              String    @unique
+  username           String    @unique
+  passwordHash       String
+  emailVerifiedAt    DateTime?
+  verificationToken  String?   @unique
+  tokenExpiresAt     DateTime?
+  verificationCode   String?
+  codeAttempts       Int       @default(0)
+  verificationSentAt DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }

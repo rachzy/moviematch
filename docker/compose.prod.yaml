@@ -19,6 +19,12 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://moviematch:${POSTGRES_PASSWORD:-moviematch}@db:5432/moviematch
+      WWW_URL: ${WWW_URL:-http://localhost:3000}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USER: ${MAIL_USER:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-noreply@moviematch.com}
     ports: ['3001:3001']
     depends_on: { db: { condition: service_healthy } }
 
