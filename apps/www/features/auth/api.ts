@@ -1,8 +1,8 @@
 import { http } from '@/shared/lib/http';
-import type { LoginInput, RegisterInput, User } from './types';
+import type { LoginInput, LoginResponse, RegisterInput, User } from './types';
 
 export async function login(input: LoginInput) {
-  const { data } = await http.post<{ message: string }>('/auth/login', input);
+  const { data } = await http.post<LoginResponse>('/auth/login', input);
   return data;
 }
 
