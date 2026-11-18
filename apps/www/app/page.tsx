@@ -18,7 +18,13 @@ const posters = [
   },
 ];
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ verified?: string }>;
+}) {
+  const { verified } = await searchParams;
+
   return (
     <div className="login-container">
       {/* Coluna Esquerda: Marca e Ilustrações */}
@@ -85,6 +91,11 @@ export default function Home() {
 
       {/* Coluna Direita: Formulário de Login */}
       <section className="form-column">
+        {verified && (
+          <p role="status" className="verified-notice">
+            E-mail verificado! Agora é só entrar.
+          </p>
+        )}
         <LoginForm />
       </section>
     </div>

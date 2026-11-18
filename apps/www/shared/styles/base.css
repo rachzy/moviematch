@@ -1,0 +1,53 @@
+:root {
+  /* Cores do Design System */
+  --bg: #0b1220;
+  --surface: #111827;
+  --surface-hover: #1f2937;
+  --border: #334155;
+  --focus: #2563eb;
+  --error: #f87171;
+  --error-bg: rgba(248, 113, 113, 0.1);
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --link-dark: #60a5fa;
+  --stars: #f59e0b;
+  --success: #22c55e;
+  --text: #f1f5f9;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-support: #cbd5e1;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-weight: 400;
+}
+
+a {
+  color: var(--link-dark);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+main {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
