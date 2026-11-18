@@ -6,6 +6,11 @@ export class User {
     readonly username: string,
     readonly passwordHash: string,
     readonly createdAt: Date,
+    readonly emailVerifiedAt: Date | null = null,
+    readonly tokenExpiresAt: Date | null = null,
+    readonly verificationCode: string | null = null,
+    readonly codeAttempts: number = 0,
+    readonly verificationSentAt: Date | null = null,
   ) {}
 
   // Representação segura para devolver ao cliente (sem o hash).

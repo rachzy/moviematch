@@ -19,6 +19,7 @@ down:
 
 test:
 	$(DEV) run --rm --no-deps api npm test
+	$(DEV) run --rm --no-deps www npm test -w www
 
 # Roda no host (requer npm install)
 format:
