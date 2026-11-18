@@ -6,6 +6,7 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
 import { createHash, randomBytes, randomInt } from 'crypto';
 import { MailService } from '../mail/mail.service';
@@ -42,6 +43,7 @@ export class AuthService {
   constructor(
     private readonly users: UserRepository,
     private readonly mail: MailService,
+    private readonly jwt: JwtService,
   ) {}
 
   // O usuário já existe: falha no envio não deve derrubar a operação.
@@ -153,7 +155,11 @@ export class AuthService {
       );
     }
 
-    return { message: 'Login efetuado com sucesso' };
+    const accessToken = await this.jwt.signAsync({
+      sub: user.id,
+      email: user.email,
+    });
+    return { message: 'Login efetuado com sucesso', accessToken };
   }
 
   // Resposta idêntica para qualquer caso (não revela se o e-mail existe nem o cooldown).
