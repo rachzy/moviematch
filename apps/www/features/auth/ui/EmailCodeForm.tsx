@@ -114,14 +114,18 @@ export function EmailCodeForm({ email, onConfirm, onResend }: Props) {
       setView('done');
     } catch (err) {
       const res = axios.isAxiosError(err) ? err.response : undefined;
-      if (res?.data?.message?.startsWith('Muitas tentativas')) {
+      const apiMessage =
+        typeof res?.data?.message === 'string' ? res.data.message : '';
+      if (apiMessage.startsWith('Muitas tentativas')) {
         setView('blocked'); // a API bloqueou o código: só um novo resolve
+        setError('');
+      } else {
+        setError(
+          res?.status === 400
+            ? apiMessage || 'Código incorreto ou expirado.'
+            : 'Não foi possível verificar agora. Tente novamente.',
+        );
       }
-      setError(
-        res?.status === 400
-          ? res.data?.message || 'Código incorreto ou expirado.'
-          : 'Não foi possível verificar agora. Tente novamente.',
-      );
       setDigits(Array(LENGTH).fill(''));
       refocus.current = true;
       setLoading(false);
@@ -158,6 +162,11 @@ export function EmailCodeForm({ email, onConfirm, onResend }: Props) {
           </>
         }
       >
+        {error && (
+          <p className="field-error" role="alert">
+            {error}
+          </p>
+        )}
         <button type="button" className="btn-primary" onClick={handleResend}>
           Enviar novo código
         </button>

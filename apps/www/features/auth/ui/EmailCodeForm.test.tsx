@@ -111,6 +111,40 @@ describe('EmailCodeForm', () => {
     expect(box(1)).toHaveValue('');
   });
 
+  it('falha ao pedir novo código no bloqueio mostra o erro', async () => {
+    const err = new AxiosError('x', 'ERR', undefined, undefined, {
+      status: 400,
+      data: { message: 'Muitas tentativas. Solicite um novo código.' },
+    } as never);
+    const { user, confirm } = setup(
+      vi.fn().mockRejectedValue(err),
+      vi.fn().mockRejectedValue(new Error('rede')),
+    );
+    await user.keyboard('123456');
+    await confirm();
+    await user.click(
+      await screen.findByRole('button', { name: 'Enviar novo código' }),
+    );
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Não foi possível reenviar agora',
+    );
+    expect(screen.getByText('Muitas tentativas')).toBeInTheDocument();
+  });
+
+  it('400 sem mensagem em texto usa o aviso padrão', async () => {
+    const err = new AxiosError('x', 'ERR', undefined, undefined, {
+      status: 400,
+      data: { message: ['x'] },
+    } as never);
+    const { user, confirm } = setup(vi.fn().mockRejectedValue(err));
+    await user.keyboard('123456');
+    await confirm();
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Código incorreto ou expirado.',
+    );
+  });
+
   it('erro de rede mostra mensagem genérica', async () => {
     const { user, confirm } = setup(vi.fn().mockRejectedValue(new Error('x')));
     await user.keyboard('123456');
