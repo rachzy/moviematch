@@ -27,7 +27,11 @@ const IMAGE = 'https://image.tmdb.org/t/p/w500';
 
 // Sem acento e sem diferença de caixa.
 const normalize = (s: string) =>
-  s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim();
+  s
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .trim();
 
 const toSummary = (m: TmdbMovie): MovieSummary => ({
   id: m.id,
@@ -46,7 +50,10 @@ export class TmdbClient {
     private readonly fetchFn: typeof fetch = fetch,
   ) {}
 
-  private async get<T>(path: string, params: Record<string, string | number> = {}) {
+  private async get<T>(
+    path: string,
+    params: Record<string, string | number> = {},
+  ) {
     const url = new URL(BASE + path);
     url.search = new URLSearchParams({ language: 'pt-BR', ...params } as Record<
       string,
@@ -76,9 +83,12 @@ export class TmdbClient {
   }
 
   async searchByActor(query: string) {
-    const people = await this.get<{ results: { id: number }[] }>('/search/person', {
-      query,
-    });
+    const people = await this.get<{ results: { id: number }[] }>(
+      '/search/person',
+      {
+        query,
+      },
+    );
     const person = people?.results[0];
     return person ? this.list('/discover/movie', { with_cast: person.id }) : [];
   }

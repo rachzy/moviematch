@@ -18,7 +18,9 @@ export class MoviesController {
   constructor(private readonly movies: MoviesService) {}
 
   @Get()
-  search(@Query(new ZodValidationPipe(searchMoviesSchema)) query: SearchMoviesDto) {
+  search(
+    @Query(new ZodValidationPipe(searchMoviesSchema)) query: SearchMoviesDto,
+  ) {
     return this.movies.search(query);
   }
 

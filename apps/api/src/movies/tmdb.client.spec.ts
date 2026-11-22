@@ -2,7 +2,11 @@ import { BadGatewayException } from '@nestjs/common';
 import { TmdbClient } from './tmdb.client';
 
 const json = (body: unknown, status = 200) =>
-  ({ ok: status >= 200 && status < 300, status, json: async () => body }) as Response;
+  ({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => body,
+  }) as Response;
 
 const movie = {
   id: 194,
@@ -14,7 +18,8 @@ const movie = {
 
 describe('TmdbClient', () => {
   const fetchFn = jest.fn();
-  const client = () => new TmdbClient('tok', fetchFn as unknown as typeof fetch);
+  const client = () =>
+    new TmdbClient('tok', fetchFn as unknown as typeof fetch);
   const calledUrl = (i = 0): URL => new URL(fetchFn.mock.calls[i][0]);
 
   beforeEach(() => jest.resetAllMocks());
@@ -82,7 +87,12 @@ describe('TmdbClient', () => {
   });
 
   describe('findGenreId', () => {
-    const genres = { genres: [{ id: 28, name: 'Ação' }, { id: 35, name: 'Comédia' }] };
+    const genres = {
+      genres: [
+        { id: 28, name: 'Ação' },
+        { id: 35, name: 'Comédia' },
+      ],
+    };
 
     it('ignora acento e caixa e cacheia a lista', async () => {
       fetchFn.mockResolvedValue(json(genres));
@@ -113,15 +123,23 @@ describe('TmdbClient', () => {
           ...movie,
           overview: 'sinopse',
           genres: [{ id: 35, name: 'Comédia' }],
-          credits: { cast: Array.from({ length: 15 }, (_, i) => ({ name: `Ator ${i}` })) },
+          credits: {
+            cast: Array.from({ length: 15 }, (_, i) => ({ name: `Ator ${i}` })),
+          },
         }),
       );
 
       const result = await client().getMovie(194);
 
       expect(calledUrl().pathname).toBe('/3/movie/194');
-      expect(calledUrl().searchParams.get('append_to_response')).toBe('credits');
-      expect(result).toMatchObject({ id: 194, overview: 'sinopse', genres: ['Comédia'] });
+      expect(calledUrl().searchParams.get('append_to_response')).toBe(
+        'credits',
+      );
+      expect(result).toMatchObject({
+        id: 194,
+        overview: 'sinopse',
+        genres: ['Comédia'],
+      });
       expect(result?.cast).toHaveLength(10);
     });
 
@@ -132,14 +150,21 @@ describe('TmdbClient', () => {
   });
 
   describe('falhas', () => {
-    it.each([500, 429])('status %i vira BadGatewayException', async (status) => {
-      fetchFn.mockResolvedValue(json({}, status));
-      await expect(client().searchByTitle('x')).rejects.toThrow(BadGatewayException);
-    });
+    it.each([500, 429])(
+      'status %i vira BadGatewayException',
+      async (status) => {
+        fetchFn.mockResolvedValue(json({}, status));
+        await expect(client().searchByTitle('x')).rejects.toThrow(
+          BadGatewayException,
+        );
+      },
+    );
 
     it('erro de rede vira BadGatewayException', async () => {
       fetchFn.mockRejectedValue(new Error('timeout'));
-      await expect(client().searchByTitle('x')).rejects.toThrow(BadGatewayException);
+      await expect(client().searchByTitle('x')).rejects.toThrow(
+        BadGatewayException,
+      );
     });
   });
 });

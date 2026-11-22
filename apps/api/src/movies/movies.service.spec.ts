@@ -27,11 +27,14 @@ describe('MoviesService', () => {
   });
 
   describe('search', () => {
-    it.each([{}, { q: '' }, { q: '   ' }])('sem q nem genre devolve [] sem chamar o TMDB (%j)', async (dto) => {
-      expect(await service.search(dto)).toEqual([]);
-      expect(tmdb.searchByTitle).not.toHaveBeenCalled();
-      expect(tmdb.discoverByGenre).not.toHaveBeenCalled();
-    });
+    it.each([{}, { q: '' }, { q: '   ' }])(
+      'sem q nem genre devolve [] sem chamar o TMDB (%j)',
+      async (dto) => {
+        expect(await service.search(dto)).toEqual([]);
+        expect(tmdb.searchByTitle).not.toHaveBeenCalled();
+        expect(tmdb.discoverByGenre).not.toHaveBeenCalled();
+      },
+    );
 
     it('junta título e ator sem duplicar, título primeiro', async () => {
       tmdb.searchByTitle.mockResolvedValue([m(1), m(2)]);
@@ -62,16 +65,31 @@ describe('MoviesService', () => {
     });
 
     it('limita a 50 e não expõe genreIds', async () => {
-      tmdb.searchByTitle.mockResolvedValue(Array.from({ length: 60 }, (_, i) => m(i, [1])));
+      tmdb.searchByTitle.mockResolvedValue(
+        Array.from({ length: 60 }, (_, i) => m(i, [1])),
+      );
       const result = await service.search({ q: 'x' });
       expect(result).toHaveLength(50);
-      expect(result[0]).toEqual({ id: 0, title: 'Filme 0', year: 2000, posterUrl: null });
+      expect(result[0]).toEqual({
+        id: 0,
+        title: 'Filme 0',
+        year: 2000,
+        posterUrl: null,
+      });
     });
   });
 
   describe('findOne', () => {
     it('devolve os detalhes', async () => {
-      const details = { id: 1, title: 'a', year: 2000, posterUrl: null, overview: '', genres: [], cast: [] };
+      const details = {
+        id: 1,
+        title: 'a',
+        year: 2000,
+        posterUrl: null,
+        overview: '',
+        genres: [],
+        cast: [],
+      };
       tmdb.getMovie.mockResolvedValue(details);
       expect(await service.findOne(1)).toBe(details);
     });
