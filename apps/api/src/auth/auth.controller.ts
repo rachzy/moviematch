@@ -1,4 +1,11 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import {
   loginSchema,
@@ -13,6 +20,8 @@ import {
   type VerifyCodeDto,
 } from './auth.schemas';
 import { AuthService } from './auth.service';
+import { CurrentUser, type AuthUser } from './current-user.decorator';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -44,6 +53,12 @@ export class AuthController {
     body: ResendVerificationDto,
   ) {
     return this.auth.resendVerification(body.email);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  me(@CurrentUser() user: AuthUser) {
+    return { id: user.id, email: user.email };
   }
 
   @Post('verify-code')
