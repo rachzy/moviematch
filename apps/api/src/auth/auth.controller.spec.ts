@@ -25,6 +25,13 @@ describe('AuthController', () => {
     );
   });
 
+  it('GET /auth/me devolve o usuário do token', () => {
+    expect(controller.me({ id: '1', email: 'a@a.com' })).toEqual({
+      id: '1',
+      email: 'a@a.com',
+    });
+  });
+
   it('resend-verification repassa o e-mail', async () => {
     auth.resendVerification.mockResolvedValue({ message: 'ok' });
     await controller.resendVerification({ email: 'a@a.com' });
