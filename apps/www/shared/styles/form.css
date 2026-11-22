@@ -1,17 +1,5 @@
-.auth input {
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: inherit;
-  background: var(--bg);
-  font: inherit;
-}
-.auth input[aria-invalid='true'] {
-  border-color: var(--error);
-}
-
 .field-group {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -43,7 +31,14 @@
 }
 .field-error {
   color: var(--error);
-  font-size: 0.825rem;
+  font-size: 13px;
+}
+.field-hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.text-input::placeholder {
+  color: var(--text-secondary);
 }
 .error-banner {
   margin-top: 16px;

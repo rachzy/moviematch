@@ -14,30 +14,37 @@ import {
 import { register } from '../api';
 import { savePendingEmail } from '../pendingEmail';
 import { validateRegister, type RegisterErrors } from '../validation';
-import './register.css';
+import { AuthCard } from './AuthLayout';
 
 function Field({
   label,
+  hint,
   error,
   ...props
-}: InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string }) {
+}: InputHTMLAttributes<HTMLInputElement> & {
+  label: string;
+  hint?: string;
+  error?: string;
+}) {
   const id = useId();
-  const errorId = `${id}-error`;
+  const noteId = `${id}-note`;
+  // No design o rótulo é o próprio placeholder; o <label> fica só para leitores de tela.
   return (
     <div className="field-group">
-      <label className="field-label" htmlFor={id}>
+      <label className="sr-only" htmlFor={id}>
         {label}
       </label>
       <input
         {...props}
         id={id}
+        placeholder={label}
         aria-invalid={!!error}
-        aria-describedby={error ? errorId : undefined}
+        aria-describedby={error || hint ? noteId : undefined}
         className={`text-input ${error ? 'input-error' : ''}`}
       />
-      {error && (
-        <span id={errorId} className="field-error">
-          {error}
+      {(error || hint) && (
+        <span id={noteId} className={error ? 'field-error' : 'field-hint'}>
+          {error ?? hint}
         </span>
       )}
     </div>
@@ -103,110 +110,37 @@ export function RegisterForm() {
   }
 
   return (
-    <div className="login-container">
-      {/* Coluna de Banner (Esquerda) */}
-      <div className="brand-column">
-        <div>
-          <div className="brand-header">
-            <div className="brand-logo-icon">🎬</div>
-            <span className="brand-title">MovieMatch</span>
-          </div>
-
-          <div className="brand-hero">
-            <h1 className="brand-hero-title">
-              Encontre quem tem o mesmo gosto para filmes.
-            </h1>
-            <p className="brand-hero-subtitle">
-              Avalie o que você assistiu e conecte-se com pessoas de gosto
-              parecido.
-            </p>
-
-            <div className="match-badge">
-              <span className="match-check-icon">✓</span>
-              <span>92% de match</span>
-            </div>
-          </div>
+    <AuthCard title="Criar conta">
+      {formError && (
+        <div className="error-banner" role="alert">
+          {formError}
         </div>
+      )}
 
-        <div className="posters-row">
-          <div className="poster-item">
-            <div className="poster-card poster-blue">
-              <div className="poster-circle" />
-              <div className="poster-waves" />
-            </div>
-            <div className="poster-rating">
-              <span className="stars-gold">★★★★☆</span> 4,0 · você
-            </div>
-          </div>
+      <form ref={formRef} onSubmit={onSubmit} noValidate>
+        <Field label="E-mail" name="email" type="email" error={errors.email} />
+        <Field label="Username" name="username" error={errors.username} />
+        <Field
+          label="Senha"
+          name="password"
+          type="password"
+          hint="Mínimo de 8 caracteres, com maiúscula, minúscula, número e especial"
+          error={errors.password}
+        />
 
-          <div className="poster-item">
-            <div className="poster-card poster-orange">
-              <div className="poster-circle" />
-              <div className="poster-waves" />
-            </div>
-            <div className="poster-rating">
-              <span className="stars-gold">★★★★★</span> 4,5 · Lara
-            </div>
-          </div>
+        <button
+          type="submit"
+          className="btn-primary btn-submit"
+          disabled={loading}
+        >
+          {loading && <span className="btn-spinner" aria-hidden="true" />}
+          {loading ? 'Cadastrando…' : 'Cadastrar'}
+        </button>
+      </form>
 
-          <div className="poster-item">
-            <div className="poster-card poster-green">
-              <div className="poster-circle" />
-              <div className="poster-waves" />
-            </div>
-          </div>
-        </div>
-
-        <div className="brand-footer">© 2026 MovieMatch</div>
-      </div>
-
-      {/* Coluna do Formulário (Direita) */}
-      <div className="form-column">
-        <div className="login-card">
-          <h2>Criar conta</h2>
-
-          {formError && (
-            <div className="error-banner" role="alert">
-              {formError}
-            </div>
-          )}
-
-          <form ref={formRef} onSubmit={onSubmit} noValidate>
-            <Field
-              label="E-mail"
-              name="email"
-              type="email"
-              placeholder="seu@email.com"
-              error={errors.email}
-            />
-            <Field
-              label="Username"
-              name="username"
-              placeholder="seu_usuario"
-              error={errors.username}
-            />
-            <Field
-              label="Senha"
-              name="password"
-              type="password"
-              placeholder="Mín. 8, com maiúscula, minúscula, número e especial"
-              error={errors.password}
-            />
-
-            <button
-              type="submit"
-              className="btn-primary btn-submit"
-              disabled={loading}
-            >
-              {loading ? 'Cadastrando...' : 'Cadastrar'}
-            </button>
-          </form>
-
-          <div className="card-footer">
-            Já tem conta? <Link href="/">Entrar</Link>
-          </div>
-        </div>
-      </div>
-    </div>
+      <p className="card-footer">
+        Já tem conta? <Link href="/">Entrar</Link>
+      </p>
+    </AuthCard>
   );
 }

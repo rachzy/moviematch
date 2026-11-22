@@ -56,8 +56,8 @@ export function LoginForm() {
   }
 
   return (
-    <form className="login-card" onSubmit={onSubmit} noValidate>
-      <h2>Entrar na sua conta</h2>
+    <form className="auth-card" onSubmit={onSubmit} noValidate>
+      <h1>Entrar na sua conta</h1>
 
       <div className="field-group">
         <label htmlFor="email" className="field-label">

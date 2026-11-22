@@ -1,3 +1,4 @@
+import { AuthLayout } from '@/features/auth/ui/AuthLayout';
 import { VerifyEmailStatus } from '@/features/auth/ui/VerifyEmailStatus';
 
 // o token vai na query; não repassa a URL no header Referer
@@ -11,8 +12,8 @@ export default async function VerifyEmailPage({
   const { token } = await searchParams;
 
   return (
-    <main>
+    <AuthLayout>
       <VerifyEmailStatus token={token} />
-    </main>
+    </AuthLayout>
   );
 }

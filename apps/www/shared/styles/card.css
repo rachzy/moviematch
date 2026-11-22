@@ -1,38 +1,38 @@
-.auth {
-  display: grid;
-  gap: 16px;
-  width: 100%;
-  max-width: 360px;
-  padding: 32px;
-  border-radius: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  text-align: center;
-}
-.auth h1 span,
-.auth a {
-  color: var(--link-dark);
-}
-.auth .muted {
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-.auth .ok {
-  color: var(--success);
-}
-.auth .error {
-  color: var(--error);
-}
-
 .card-footer {
+  margin: 16px 0 0;
   text-align: center;
-  margin-top: 24px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
+  font-size: 15px;
+  color: var(--text-support);
+}
+.card-footer a {
+  text-decoration: underline;
 }
 
-.verified-notice {
-  margin-bottom: 16px;
-  color: var(--success);
+/* estados centrais do cartão: ícone, título, texto e ações */
+.status-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+}
+.status-panel > * + * {
+  margin-top: 12px;
+}
+.status-panel h2 {
+  margin-top: 20px;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+}
+.status-panel .status-text {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--text-support);
+}
+.status-text strong {
+  color: var(--text);
+}
+.status-panel .btn-primary {
+  margin-top: 20px;
 }

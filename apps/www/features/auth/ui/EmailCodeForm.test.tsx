@@ -83,6 +83,34 @@ describe('EmailCodeForm', () => {
     expect(box(1)).toHaveFocus();
   });
 
+  it('mostra a conta confirmada depois de confirmar', async () => {
+    const { user, confirm } = setup();
+    await user.keyboard('123456');
+    await confirm();
+    expect(await screen.findByText('Conta confirmada!')).toBeInTheDocument();
+  });
+
+  it('código bloqueado mostra "Muitas tentativas" e permite pedir um novo', async () => {
+    const err = new AxiosError('x', 'ERR', undefined, undefined, {
+      status: 400,
+      data: { message: 'Muitas tentativas. Solicite um novo código.' },
+    } as never);
+    const { user, box, confirm, onResend } = setup(
+      vi.fn().mockRejectedValue(err),
+    );
+    await user.keyboard('123456');
+    await confirm();
+
+    expect(await screen.findByText('Muitas tentativas')).toBeInTheDocument();
+    await user.click(
+      screen.getByRole('button', { name: 'Enviar novo código' }),
+    );
+
+    expect(onResend).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText('Confirme seu e-mail')).toBeInTheDocument();
+    expect(box(1)).toHaveValue('');
+  });
+
   it('erro de rede mostra mensagem genérica', async () => {
     const { user, confirm } = setup(vi.fn().mockRejectedValue(new Error('x')));
     await user.keyboard('123456');

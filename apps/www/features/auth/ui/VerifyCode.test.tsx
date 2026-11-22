@@ -21,7 +21,7 @@ beforeEach(() => {
 });
 
 describe('VerifyCode', () => {
-  it('usa o e-mail do sessionStorage, confirma e vai para o login', async () => {
+  it('usa o e-mail do sessionStorage e mostra a conta confirmada', async () => {
     sessionStorage.setItem('pendingEmail', 'a@b.co');
     const user = userEvent.setup();
     render(<VerifyCode />);
@@ -31,7 +31,10 @@ describe('VerifyCode', () => {
     await user.click(screen.getByRole('button', { name: 'Confirmar' }));
 
     expect(verifyCode).toHaveBeenCalledWith('a@b.co', '123456');
-    expect(push).toHaveBeenCalledWith('/?verified=1');
+    expect(await screen.findByText('Conta confirmada!')).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Ir para o login' }),
+    ).toHaveAttribute('href', '/');
     expect(readPendingEmail()).toBe('');
   });
 

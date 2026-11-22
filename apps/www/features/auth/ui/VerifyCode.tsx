@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import { resendVerification, verifyCode } from '../api';
 import {
@@ -9,10 +8,10 @@ import {
   readPendingEmail,
   savePendingEmail,
 } from '../pendingEmail';
+import { AuthCard } from './AuthLayout';
 import { EmailCodeForm } from './EmailCodeForm';
 
 export function VerifyCode() {
-  const router = useRouter();
   const [email, setEmail] = useState<string | null>(null); // null = ainda lendo
 
   useEffect(() => setEmail(readPendingEmail()), []);
@@ -29,20 +28,28 @@ export function VerifyCode() {
     }
 
     return (
-      <form className="auth" onSubmit={onSubmit}>
-        <h1>Confirme seu e-mail</h1>
-        <p className="muted">Informe o e-mail usado no cadastro.</p>
-        <input
-          name="email"
-          type="email"
-          placeholder="seu@email.com"
-          aria-label="E-mail"
-          autoFocus
-          required
-        />
-        <button type="submit">Continuar</button>
-        <Link href="/register">Voltar ao cadastro</Link>
-      </form>
+      <AuthCard title="Confirme seu e-mail">
+        <form onSubmit={onSubmit}>
+          <p className="status-text">Informe o e-mail usado no cadastro.</p>
+          <div className="field-group">
+            <input
+              name="email"
+              type="email"
+              placeholder="E-mail"
+              aria-label="E-mail"
+              className="text-input"
+              autoFocus
+              required
+            />
+          </div>
+          <button type="submit" className="btn-primary">
+            Continuar
+          </button>
+        </form>
+        <p className="card-footer">
+          <Link href="/register">Voltar ao cadastro</Link>
+        </p>
+      </AuthCard>
     );
   }
 
@@ -52,7 +59,6 @@ export function VerifyCode() {
       onConfirm={async (code) => {
         await verifyCode(email, code);
         clearPendingEmail();
-        router.push('/?verified=1');
       }}
       onResend={async () => {
         await resendVerification(email);

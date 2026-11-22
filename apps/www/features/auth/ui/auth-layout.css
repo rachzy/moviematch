@@ -1,0 +1,195 @@
+/* ===== Tela de autenticação (Figma: Cadastro · Estilo 1, notebook escuro) ===== */
+.auth-page {
+  display: grid;
+  grid-template-columns: minmax(0, 44fr) minmax(0, 56fr);
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.auth-panel {
+  display: grid;
+  place-items: center;
+  padding: 32px 24px;
+}
+
+/* ---- painel azul (esquerda) ---- */
+.auth-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 48px 56px 32px 48px;
+  background: linear-gradient(160deg, #1e3a8a 0%, #2563eb 100%);
+  overflow: hidden;
+}
+
+/* faixa de película */
+.auth-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 24px;
+  background:
+    repeating-linear-gradient(
+        to bottom,
+        transparent 0 10px,
+        rgba(255, 255, 255, 0.55) 10px 24px
+      )
+      center / 12px 100% no-repeat,
+    #1e40af;
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+.auth-brand b {
+  color: #93c5fd;
+  font-weight: 700;
+}
+
+.auth-hero-text {
+  margin-top: 40px;
+  max-width: 320px;
+}
+.auth-hero-text h2 {
+  max-width: 276px; /* quebra em 3 linhas como no Figma */
+  margin: 0 0 12px;
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 700;
+  color: #fff;
+}
+.auth-hero-text p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+  color: #bfdbfe;
+}
+
+.auth-posters {
+  position: relative;
+  height: 190px;
+  margin-top: 12px;
+}
+.auth-poster {
+  position: absolute;
+  bottom: 0;
+  width: 104px;
+  height: 140px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+.auth-poster::before {
+  content: '';
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin-left: -12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+}
+.auth-poster-blue {
+  left: 0;
+  transform: rotate(-6deg);
+  background: linear-gradient(160deg, #60a5fa, #1d4ed8);
+}
+.auth-poster-orange {
+  left: 96px;
+  height: 156px;
+  background: linear-gradient(160deg, #fb923c, #9a3412);
+}
+.auth-poster-teal {
+  left: 192px;
+  transform: rotate(5deg);
+  background: linear-gradient(160deg, #2dd4bf, #115e59);
+}
+
+.auth-match {
+  position: absolute;
+  top: 0;
+  left: 136px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.auth-check {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--success);
+  color: #fff;
+  font-size: 11px;
+}
+
+.auth-ratings {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: #bfdbfe;
+}
+.auth-stars {
+  margin-right: 6px;
+  color: var(--stars);
+  letter-spacing: 1px;
+}
+
+.auth-hero small {
+  margin-top: auto;
+  font-size: 12px;
+  color: #bfdbfe;
+}
+
+/* ---- cartão (direita) ---- */
+.auth-card {
+  width: 100%;
+  max-width: 360px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 32px;
+  background: var(--surface);
+  border: 1px solid var(--surface-hover);
+  border-radius: 12px;
+}
+.auth-card h1 {
+  margin: 0 0 24px;
+  text-align: center;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* celular: some o painel azul */
+@media (max-width: 900px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+  .auth-hero {
+    display: none;
+  }
+}
+@media (max-width: 420px) {
+  .auth-card {
+    padding: 24px 16px;
+  }
+}

@@ -11,6 +11,9 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from 'react';
+import { AuthCard } from './AuthLayout';
+import { MailIcon, WarningIcon } from './icons';
+import { AccountConfirmed, StatusPanel } from './StatusPanel';
 import './email-code.css';
 
 const LENGTH = 6;
@@ -23,81 +26,13 @@ type Props = {
   onResend: () => Promise<void>;
 };
 
-function LogoIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-      <rect x="2" y="7" width="24" height="19" rx="4" fill="#60A5FA" />
-      <rect x="2" y="2" width="24" height="6" rx="2" fill="#93C5FD" />
-      <path d="M11 12.5v8l7-4z" fill="#fff" />
-    </svg>
-  );
-}
-
-function MailIcon() {
-  return (
-    <svg
-      width="48"
-      height="48"
-      viewBox="0 0 48 48"
-      fill="none"
-      stroke="#2563EB"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="6" y="11" width="36" height="26" rx="5" />
-      <path d="M8 15l16 12 16-12" />
-    </svg>
-  );
-}
-
-function Hero() {
-  return (
-    <aside className="ec-hero">
-      <div className="ec-brand">
-        <LogoIcon />
-        <span>
-          Movie<b>Match</b>
-        </span>
-      </div>
-
-      <div className="ec-hero-text">
-        <h2>Encontre quem tem o mesmo gosto para filmes.</h2>
-        <p>
-          Avalie o que você assistiu e conecte-se com pessoas de gosto parecido.
-        </p>
-      </div>
-
-      <div className="ec-posters" aria-hidden="true">
-        <span className="ec-poster ec-poster-blue" />
-        <span className="ec-poster ec-poster-orange" />
-        <span className="ec-poster ec-poster-teal" />
-        <span className="ec-match">
-          <span className="ec-check">✓</span>92% de match
-        </span>
-      </div>
-
-      <div className="ec-ratings" aria-hidden="true">
-        <span>
-          <span className="ec-stars">★★★★☆</span>4,0 · você
-        </span>
-        <span>
-          <span className="ec-stars">★★★★☆</span>4,5 · Lara
-        </span>
-      </div>
-
-      <small>© 2026 MovieMatch</small>
-    </aside>
-  );
-}
-
 export function EmailCodeForm({ email, onConfirm, onResend }: Props) {
   const [digits, setDigits] = useState<string[]>(Array(LENGTH).fill(''));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [cooldown, setCooldown] = useState(0);
+  const [view, setView] = useState<'code' | 'blocked' | 'done'>('code');
   const errorId = useId();
   const refs = useRef<Array<HTMLInputElement | null>>([]);
   const refocus = useRef(false); // refoca o 1º campo quando sair do loading
@@ -176,8 +111,12 @@ export function EmailCodeForm({ email, onConfirm, onResend }: Props) {
     setNotice('');
     try {
       await onConfirm(code);
+      setView('done');
     } catch (err) {
       const res = axios.isAxiosError(err) ? err.response : undefined;
+      if (res?.data?.message?.startsWith('Muitas tentativas')) {
+        setView('blocked'); // a API bloqueou o código: só um novo resolve
+      }
       setError(
         res?.status === 400
           ? res.data?.message || 'Código incorreto ou expirado.'
@@ -197,85 +136,104 @@ export function EmailCodeForm({ email, onConfirm, onResend }: Props) {
       // resposta genérica: a API não revela se o e-mail existe
       setNotice('Se o e-mail existir, enviamos um novo código.');
       setCooldown(COOLDOWN);
+      setDigits(Array(LENGTH).fill(''));
+      setView('code');
     } catch {
       setError('Não foi possível reenviar agora. Tente novamente.');
     }
   }
 
-  return (
-    <div className="ec-page">
-      <Hero />
+  if (view === 'done') return <AccountConfirmed />;
 
-      <section className="ec-panel">
-        <div className="ec">
-          <h1>Criar conta</h1>
-          <MailIcon />
-          <h2>Confirme seu e-mail</h2>
-          <p className="ec-text">
-            Enviamos um código de 6 dígitos para
+  if (view === 'blocked') {
+    return (
+      <StatusPanel
+        icon={<WarningIcon />}
+        title="Muitas tentativas"
+        text={
+          <>
+            Por segurança, este código foi bloqueado.
             <br />
-            {email ? <strong>{email}</strong> : 'o seu e-mail'}
+            Solicite um novo código para continuar.
+          </>
+        }
+      >
+        <button type="button" className="btn-primary" onClick={handleResend}>
+          Enviar novo código
+        </button>
+        <p className="card-footer">
+          Voltar para o <Link href="/register">cadastro</Link>
+        </p>
+      </StatusPanel>
+    );
+  }
+
+  return (
+    <AuthCard title="Criar conta">
+      <div className="status-panel">
+        <MailIcon />
+        <h2>Confirme seu e-mail</h2>
+        <p className="status-text">
+          Enviamos um código de 6 dígitos para
+          <br />
+          {email ? <strong>{email}</strong> : 'o seu e-mail'}
+        </p>
+
+        <form className="ec-form" onSubmit={handleSubmit} noValidate>
+          <div className="ec-boxes">
+            {digits.map((digit, i) => (
+              <input
+                key={i}
+                ref={(el) => {
+                  refs.current[i] = el;
+                }}
+                className="ec-box"
+                type="text"
+                inputMode="numeric"
+                autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                aria-label={`Dígito ${i + 1} de ${LENGTH}`}
+                aria-invalid={!!error}
+                aria-describedby={error ? errorId : undefined}
+                value={digit}
+                disabled={loading}
+                onChange={(e) => handleChange(i, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(i, e)}
+                onPaste={handlePaste}
+                onFocus={(e) => e.target.select()}
+              />
+            ))}
+          </div>
+
+          <p id={errorId} className="field-error ec-error" role="alert">
+            {error}
           </p>
 
-          <form className="ec-form" onSubmit={handleSubmit} noValidate>
-            <div className="ec-boxes">
-              {digits.map((digit, i) => (
-                <input
-                  key={i}
-                  ref={(el) => {
-                    refs.current[i] = el;
-                  }}
-                  className="ec-box"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete={i === 0 ? 'one-time-code' : 'off'}
-                  aria-label={`Dígito ${i + 1} de ${LENGTH}`}
-                  aria-invalid={!!error}
-                  aria-describedby={error ? errorId : undefined}
-                  value={digit}
-                  disabled={loading}
-                  onChange={(e) => handleChange(i, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(i, e)}
-                  onPaste={handlePaste}
-                  onFocus={(e) => e.target.select()}
-                />
-              ))}
-            </div>
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading && <span className="btn-spinner" aria-hidden="true" />}
+            {loading ? 'Verificando…' : 'Confirmar'}
+          </button>
+        </form>
 
-            <p id={errorId} className="ec-error" role="alert">
-              {error}
-            </p>
-
-            <button type="submit" className="ec-btn" disabled={loading}>
-              {loading && <span className="ec-spinner" aria-hidden="true" />}
-              {loading ? 'Verificando…' : 'Confirmar'}
-            </button>
-          </form>
-
-          <p className="ec-foot">
-            Não recebeu?{' '}
-            <button
-              type="button"
-              className="ec-link"
-              onClick={handleResend}
-              disabled={loading || cooldown > 0}
-            >
-              {cooldown > 0 ? `Reenviar em ${cooldown}s` : 'Reenviar código'}
-            </button>
+        <p className="card-footer">
+          Não recebeu?{' '}
+          <button
+            type="button"
+            className="btn-link"
+            onClick={handleResend}
+            disabled={loading || cooldown > 0}
+          >
+            {cooldown > 0 ? `Reenviar em ${cooldown}s` : 'Reenviar código'}
+          </button>
+        </p>
+        <p className="ec-status" role="status" aria-live="polite">
+          {notice}
+        </p>
+        {!loading && (
+          <p className="card-footer">
+            E-mail errado? <Link href="/register">Voltar ao cadastro</Link>
           </p>
-          <p className="ec-status" role="status" aria-live="polite">
-            {notice}
-          </p>
-          {!loading && (
-            <p className="ec-foot">
-              E-mail errado?{' '}
-              <Link href="/register" className="ec-link">
-                Voltar ao cadastro
-              </Link>
-            </p>
-          )}
-        </div>
-      </section>
-    </div>
+        )}
+      </div>
+    </AuthCard>
   );
 }

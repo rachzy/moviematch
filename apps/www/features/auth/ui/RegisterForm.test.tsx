@@ -34,6 +34,18 @@ beforeEach(() => {
 });
 
 describe('RegisterForm', () => {
+  it('mostra a dica de senha e troca por erro quando inválida', async () => {
+    render(<RegisterForm />);
+    expect(screen.getByText(/Mínimo de 8 caracteres/)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('E-mail')).toBeInTheDocument();
+
+    await fill('', '', '');
+    expect(
+      screen.queryByText(/Mínimo de 8 caracteres/),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('Crie uma senha.')).toBeInTheDocument();
+  });
+
   it('mostra erros por campo e não chama a API', async () => {
     render(<RegisterForm />);
     await fill('', '', '');

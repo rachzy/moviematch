@@ -27,7 +27,7 @@ describe('VerifyEmailStatus', () => {
     render(<VerifyEmailStatus token="tok" />);
 
     expect(screen.getByText(/Confirmando/)).toBeInTheDocument();
-    expect(await screen.findByText('E-mail confirmado!')).toBeInTheDocument();
+    expect(await screen.findByText('Conta confirmada!')).toBeInTheDocument();
     expect(verifyEmail).toHaveBeenCalledWith('tok');
     expect(verifyEmail).toHaveBeenCalledTimes(1);
   });

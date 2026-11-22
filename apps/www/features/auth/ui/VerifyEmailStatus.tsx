@@ -4,6 +4,8 @@ import axios from 'axios';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { verifyEmail } from '../api';
+import { MailIcon, WarningIcon } from './icons';
+import { AccountConfirmed, StatusPanel } from './StatusPanel';
 
 type Status = 'loading' | 'success' | 'invalid' | 'unavailable';
 
@@ -25,44 +27,38 @@ export function VerifyEmailStatus({ token }: { token?: string }) {
 
   if (status === 'loading') {
     return (
-      <div className="auth">
-        <h1>Confirmando seu e-mail...</h1>
-        <p className="muted">Só um instante.</p>
-      </div>
+      <StatusPanel
+        icon={<MailIcon />}
+        title="Confirmando seu e-mail..."
+        text="Só um instante."
+      />
     );
   }
 
-  if (status === 'success') {
-    return (
-      <div className="auth">
-        <h1>E-mail confirmado!</h1>
-        <p className="muted">Sua conta foi ativada com sucesso.</p>
-        <Link href="/" className="button">
-          Ir para o login
-        </Link>
-      </div>
-    );
-  }
+  if (status === 'success') return <AccountConfirmed />;
 
   if (status === 'unavailable') {
     return (
-      <div className="auth">
-        <h1>Não foi possível confirmar</h1>
-        <p className="muted">
-          Houve um problema de conexão. Recarregue a página para tentar de novo.
-        </p>
-      </div>
+      <StatusPanel
+        icon={<WarningIcon />}
+        title="Não foi possível confirmar"
+        text="Houve um problema de conexão. Recarregue a página para tentar de novo."
+      />
     );
   }
 
   return (
-    <div className="auth">
-      <h1>Link inválido ou expirado</h1>
-      <p className="muted">Não foi possível confirmar seu e-mail.</p>
-      <Link href="/register/verify" className="button">
+    <StatusPanel
+      icon={<WarningIcon />}
+      title="Link inválido ou expirado"
+      text="Não foi possível confirmar seu e-mail."
+    >
+      <Link href="/register/verify" className="btn-primary">
         Reenviar e-mail de confirmação
       </Link>
-      <Link href="/">Ir para o login</Link>
-    </div>
+      <p className="card-footer">
+        Voltar para o <Link href="/">login</Link>
+      </p>
+    </StatusPanel>
   );
 }
