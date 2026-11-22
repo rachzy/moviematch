@@ -38,6 +38,8 @@ $env:DATABASE_URL="postgresql://moviematch:moviematch@localhost:5432/moviematch"
 
 Os arquivos ficam em `docker/`; rode sempre da raiz do repositório.
 
+A API de filmes usa o [TMDB](https://www.themoviedb.org/). Crie uma conta, gere o **API Read Access Token** em Settings → API e salve em `docker/.env` como `TMDB_READ_ACCESS_TOKEN=...` (veja `docker/.env.example`). Sem ele a API não sobe.
+
 Pra instalar e rodar todo o ambiente de desenvolvimento:
 
 ```bash

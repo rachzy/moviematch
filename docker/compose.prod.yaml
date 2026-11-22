@@ -21,6 +21,7 @@ services:
       DATABASE_URL: postgresql://moviematch:${POSTGRES_PASSWORD:-moviematch}@db:5432/moviematch
       WWW_URL: ${WWW_URL:-http://localhost:3000}
       JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET em docker/.env}
+      TMDB_READ_ACCESS_TOKEN: ${TMDB_READ_ACCESS_TOKEN:?defina TMDB_READ_ACCESS_TOKEN em docker/.env}
       MAIL_HOST: ${MAIL_HOST:-}
       MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USER: ${MAIL_USER:-}
