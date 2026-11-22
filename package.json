@@ -9,6 +9,7 @@
     "build": "nx run-many -t build",
     "start": "nx run-many -t start",
     "test": "nx run-many -t test",
+    "storybook:ui": "npm run storybook -w www",
     "format": "prettier --write ."
   },
   "devDependencies": {
