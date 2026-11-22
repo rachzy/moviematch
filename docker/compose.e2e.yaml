@@ -1,0 +1,46 @@
+# Uso: make e2e. Sobrepõe compose.yaml: sem portas no host, URLs pela rede do Docker e o serviço e2e.
+services:
+  api:
+    environment:
+      WWW_URL: http://www:3000
+    ports: !reset []
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:3001/auth/me').then(()=>process.exit(0),()=>process.exit(1))",
+        ]
+      interval: 3s
+      retries: 60
+  www:
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:3001
+    ports: !reset []
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:3000').then(()=>process.exit(0),()=>process.exit(1))",
+        ]
+      interval: 3s
+      retries: 60
+  db:
+    ports: !reset []
+  mailpit:
+    ports: !reset []
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.65.1-noble
+    working_dir: /e2e
+    command: sh -c "npm ci && npx playwright test"
+    volumes: ['../e2e:/e2e', 'e2e_node_modules:/e2e/node_modules']
+    depends_on:
+      api: { condition: service_healthy }
+      www: { condition: service_healthy }
+      mailpit: { condition: service_started }
+
+volumes:
+  e2e_node_modules:

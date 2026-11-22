@@ -1,7 +1,8 @@
 DEV = docker compose -f docker/compose.yaml
 PROD = docker compose -f docker/compose.prod.yaml
+E2E = docker compose -p moviematch-e2e -f docker/compose.yaml -f docker/compose.e2e.yaml
 
-.PHONY: dev logs prod down test format migrate
+.PHONY: dev logs prod down test e2e format migrate
 
 dev:
 	$(DEV) up --build -d
@@ -20,6 +21,10 @@ down:
 test:
 	$(DEV) run --rm --no-deps api npm test
 	$(DEV) run --rm --no-deps www npm test -w www
+
+# Testes E2E (Playwright) em containers, com stack e banco isolados do `make dev`
+e2e:
+	$(E2E) up --build --abort-on-container-exit --exit-code-from e2e; s=$$?; $(E2E) down -v; exit $$s
 
 # Roda no host (requer npm install)
 format:
