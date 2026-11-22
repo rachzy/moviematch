@@ -26,6 +26,7 @@ Exemplo de referência: `auth` + `users`. Fluxo: controller → service → repo
 
 - `<módulo>/` — controller (HTTP), service (regras), `*.schemas.ts` (zod; validação do body via `common/zod-validation.pipe.ts`).
 - `users/` — `user.entity.ts` (entity de domínio) e `user.repository.ts` (único ponto que usa o `PrismaService`; devolve entities, nunca o tipo do Prisma).
+- `movies/` — busca de filmes via TMDB (`GET /movies`, `GET /movies/:id`, protegidas por `JwtAuthGuard`). Sem Prisma: `tmdb.client.ts` é o único ponto que fala com o TMDB; o `id` do filme é o `tmdbId`. Exige `TMDB_READ_ACCESS_TOKEN`.
 - `prisma/` — `PrismaModule` global.
 
 ## Arquitetura do front (`apps/www`): Feature-Based Layered Architecture
