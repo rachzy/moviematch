@@ -1,4 +1,4 @@
-/* ---------- BOTÕES GERAIS E MODAL ---------- */
+/*  BOTÕES GERAIS E MODAL */
 .btn {
   font: inherit;
   font-weight: 600;
@@ -16,7 +16,7 @@
   border-color: var(--text-secondary);
 }
 
-/* ---------- ÁREA LOGADA--------- */
+/* ÁREA LOGADA */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -59,5 +59,55 @@
   gap: 12px;
 }
 .modal-actions .btn-primary {
-  width: auto; /* sem isto o btn-primary (100%) estica no flex */
+  width: auto; /* sem issoo btn-primary (100%) estica no flex */
+}
+/* Componente de estrelas(SCRUM-71)*/
+.stars {
+  --star-on: #f59e0b;
+  --star-off: #334155;
+  display: inline-flex;
+  gap: 4px;
+}
+.star {
+  position: relative;
+  color: var(--star-off);
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    transform 0.15s;
+}
+.star.on {
+  color: var(--star-on);
+}
+.star:hover {
+  transform: scale(1.1);
+}
+.star input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+.star:has(input:focus-visible) {
+  border-radius: 4px;
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+.star:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
