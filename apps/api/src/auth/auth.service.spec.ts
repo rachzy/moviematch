@@ -5,6 +5,7 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { JwtService } from '@nestjs/jwt';
 import { hash } from 'bcryptjs';
 import { createHash } from 'crypto';
 import type { MailService } from '../mail/mail.service';
@@ -49,9 +50,11 @@ describe('AuthService', () => {
     markEmailAsVerified: jest.fn(),
   };
   const mail = { sendVerificationEmail: jest.fn() };
+  const jwt = { signAsync: jest.fn() };
   const service = new AuthService(
     repo as unknown as UserRepository,
     mail as unknown as MailService,
+    jwt as unknown as JwtService,
   );
 
   beforeEach(() => jest.resetAllMocks());
@@ -274,13 +277,21 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('aceita credenciais corretas', async () => {
+    it('aceita credenciais corretas e devolve o token', async () => {
       repo.findByEmail.mockResolvedValue(
         makeUser(await hash('12345678', 4), { verified: true }),
       );
+      jwt.signAsync.mockResolvedValue('jwt-token');
       await expect(
         service.login({ email: 'a@a.com', password: '12345678' }),
-      ).resolves.toEqual({ message: 'Login efetuado com sucesso' });
+      ).resolves.toEqual({
+        message: 'Login efetuado com sucesso',
+        accessToken: 'jwt-token',
+      });
+      expect(jwt.signAsync).toHaveBeenCalledWith({
+        sub: '1',
+        email: 'a@a.com',
+      });
     });
 
     it('rejeita login de e-mail não verificado', async () => {
@@ -288,6 +299,7 @@ describe('AuthService', () => {
       await expect(
         service.login({ email: 'a@a.com', password: '12345678' }),
       ).rejects.toThrow(ForbiddenException);
+      expect(jwt.signAsync).not.toHaveBeenCalled();
     });
 
     it('rejeita senha errada', async () => {
@@ -295,6 +307,7 @@ describe('AuthService', () => {
       await expect(
         service.login({ email: 'a@a.com', password: 'errada' }),
       ).rejects.toThrow(UnauthorizedException);
+      expect(jwt.signAsync).not.toHaveBeenCalled();
     });
 
     it('rejeita e-mail inexistente', async () => {
