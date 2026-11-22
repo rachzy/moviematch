@@ -14,12 +14,12 @@ export function RegisterForm() {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     try {
-      const user = await register({
+      const { message } = await register({
         email: String(form.get('email')),
         username: String(form.get('username')),
         password: String(form.get('password')),
       });
-      setResult({ ok: true, text: `Usuário ${user.username} cadastrado!` });
+      setResult({ ok: true, text: message });
     } catch (err) {
       const message =
         axios.isAxiosError(err) && err.response?.status === 409

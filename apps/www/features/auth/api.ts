@@ -1,5 +1,5 @@
 import { http } from '@/shared/lib/http';
-import type { LoginInput, LoginResponse, RegisterInput, User } from './types';
+import type { LoginInput, LoginResponse, RegisterInput } from './types';
 
 export async function login(input: LoginInput) {
   const { data } = await http.post<LoginResponse>('/auth/login', input);
@@ -7,7 +7,10 @@ export async function login(input: LoginInput) {
 }
 
 export async function register(input: RegisterInput) {
-  const { data } = await http.post<User>('/auth/register', input);
+  const { data } = await http.post<{ message: string }>(
+    '/auth/register',
+    input,
+  );
   return data;
 }
 

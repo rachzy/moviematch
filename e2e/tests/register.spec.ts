@@ -7,8 +7,9 @@ test('cadastro válido confirma e envia e-mail de verificação', async ({
 }) => {
   const user = newUser();
   await register(page, user);
-  // Não checa o texto: hoje ele sai "Usuário undefined cadastrado!" (a API devolve só { message }).
-  await expect(page.locator('p.ok')).toBeVisible();
+  await expect(page.locator('p.ok')).toHaveText(
+    'Cadastro realizado! Verifique seu e-mail.',
+  );
   expect(await getVerificationPath(user.email)).toContain('/verify-email');
 });
 
