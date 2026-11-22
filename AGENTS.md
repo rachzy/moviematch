@@ -15,6 +15,7 @@ Monorepo NX com npm workspaces. NX infere os targets a partir dos `scripts` de c
 Tudo roda via Docker; o `Makefile` é a interface principal, mas o repo também deve funcionar sem ele (comandos `docker compose -f docker/...` no README). Mantenha os dois em sincronia. Scripts do root (`dev`, `build`, `start`, `test`) apenas disparam `nx run-many -t <target>`.
 
 - Formatação: Prettier (`.prettierrc`), via `npm run format` / `make format` (roda no host, não no Docker).
+- Storybook (UI): `npm run storybook -w www` (porta 6006, roda no host); stories ficam ao lado dos componentes (`*.stories.tsx`) e em `apps/www/stories`.
 - Logs: `make dev` sobe em background; use `make logs s=api|www|db` para acompanhar um serviço.
 - Teste único: `docker compose -f docker/compose.yaml run --rm --no-deps api npm exec -w api -- jest -t "nome do teste"`
 - Nova migration: `make migrate name=...` (commite a pasta gerada em `apps/api/prisma/migrations`).
@@ -35,6 +36,10 @@ Exemplo de referência: `auth` + `users`. Fluxo: controller → service → repo
 - Dependências só descem: `app` → `features/*/ui` → `features/*/api` → `shared`. Features não importam umas das outras; se algo for comum, vai para `shared`.
 - Imports usam o alias `@/` (raiz de `apps/www`). Para novas requisições, sempre use `shared/lib/http.ts`.
 - A API libera CORS (`app.enableCors()`) porque o browser chama `NEXT_PUBLIC_API_URL` (padrão `http://localhost:3001`) direto.
+
+## UI e Storybook (obrigatório para qualquer agente)
+
+Toda criação ou alteração de componente de UI em `apps/www` (`features/*/ui`, `shared`, estilos em `app/globals.css`) **deve** vir acompanhada da story correspondente (`*.stories.tsx` ao lado do componente). Delegue isso à skill `storybook-stories` (`.claude/skills/storybook-stories/SKILL.md`): invoque-a antes de dar a tarefa de UI por concluída, e valide com `npm run build-storybook -w www`.
 
 ## Docker
 
