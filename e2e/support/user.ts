@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto';
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+import { getVerificationPath } from './mailpit';
 
 export const PASSWORD = 'Senha@1234';
 
@@ -15,9 +16,9 @@ export async function register(
   password = PASSWORD,
 ) {
   await page.goto('/register');
-  await page.getByPlaceholder('E-mail').fill(user.email);
-  await page.getByPlaceholder('Username').fill(user.username);
-  await page.getByPlaceholder(/^Senha/).fill(password);
+  await page.getByLabel('E-mail', { exact: true }).fill(user.email);
+  await page.getByLabel('Username', { exact: true }).fill(user.username);
+  await page.getByLabel('Senha', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Cadastrar' }).click();
 }
 
@@ -26,4 +27,15 @@ export async function login(page: Page, email: string, password: string) {
   await page.getByLabel('E-mail').fill(email);
   await page.getByLabel('Senha').fill(password);
   await page.getByRole('button', { name: 'Entrar' }).click();
+}
+
+// Registra e confirma o e-mail pelo link recebido no Mailpit.
+export async function registerAndVerify(
+  page: Page,
+  user: { email: string; username: string },
+) {
+  await register(page, user);
+  await page.waitForURL('**/register/verify');
+  await page.goto(await getVerificationPath(user.email));
+  await expect(page.getByText('Conta confirmada!')).toBeVisible();
 }

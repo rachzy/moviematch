@@ -2,28 +2,27 @@ import { expect, test } from '@playwright/test';
 import { getVerificationPath } from '../support/mailpit';
 import { newUser, register } from '../support/user';
 
-test('cadastro válido confirma e envia e-mail de verificação', async ({
+test('cadastro válido leva à tela de confirmação e envia o e-mail', async ({
   page,
 }) => {
   const user = newUser();
   await register(page, user);
-  await expect(page.locator('p.ok')).toHaveText(
-    'Cadastro realizado! Verifique seu e-mail.',
-  );
+  await expect(page).toHaveURL(/\/register\/verify$/);
   expect(await getVerificationPath(user.email)).toContain('/verify-email');
 });
 
 test('e-mail duplicado é recusado', async ({ page }) => {
   const user = newUser();
   await register(page, user);
-  await expect(page.locator('p.ok')).toBeVisible();
+  await expect(page).toHaveURL(/\/register\/verify$/);
   await register(page, { ...user, username: `${user.username}x` });
-  await expect(page.locator('p.error')).toHaveText('E-mail já cadastrado');
+  await expect(page.getByText('Este e-mail já está cadastrado.')).toBeVisible();
 });
 
-test('senha fraca é recusada pela API', async ({ page }) => {
-  await register(page, newUser(), 'senhafraca');
-  await expect(page.locator('p.error')).toHaveText(
-    'Falha no cadastro. Verifique os dados.',
-  );
+test('senha curta é recusada', async ({ page }) => {
+  await register(page, newUser(), 'abc');
+  await expect(
+    page.getByText('A senha deve ter no mínimo 8 caracteres.'),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/register$/);
 });
