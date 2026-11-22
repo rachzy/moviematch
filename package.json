@@ -10,6 +10,7 @@
     "start": "nx run-many -t start",
     "test": "nx run-many -t test",
     "storybook:ui": "npm run storybook -w www",
+    "e2e": "make e2e",
     "format": "prettier --write ."
   },
   "devDependencies": {

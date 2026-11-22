@@ -7,3 +7,4 @@ dist
 next-env.d.ts
 /tmp
 storybook-static
+e2e/node_modules
