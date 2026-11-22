@@ -1,6 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import {
+  CheckCircleIcon,
+  LogoIcon,
+  MailIcon,
+  WarningIcon,
+} from '../features/auth/ui/icons';
 
-// Tokens definidos em app/globals.css (:root).
+// Tokens definidos em shared/styles/base.css (:root).
 const TOKENS = [
   'bg',
   'surface',
@@ -15,6 +21,7 @@ const TOKENS = [
   'stars',
   'success',
   'text',
+  'text-primary',
   'text-secondary',
   'text-support',
 ];
@@ -62,6 +69,11 @@ export const Buttons: Story = {
         Desabilitado
       </button>
       <button className="btn btn-secondary">Secundário</button>
+      <button className="btn-primary" style={{ width: 160 }}>
+        <span className="btn-spinner" aria-hidden="true" />
+        Carregando…
+      </button>
+      <button className="btn-link">Botão de texto</button>
     </div>
   ),
 };
@@ -78,6 +90,17 @@ export const Inputs: Story = {
       <div className="error-banner" role="alert">
         Mensagem de erro
       </div>
+    </div>
+  ),
+};
+
+export const Icons: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
+      <LogoIcon size={48} />
+      <MailIcon />
+      <CheckCircleIcon />
+      <WarningIcon />
     </div>
   ),
 };

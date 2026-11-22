@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/features/auth/ui/AuthContext';
+import '@/shared/styles/base.css';
+import '@/shared/styles/card.css';
+import '@/shared/styles/form.css';
+import '@/shared/styles/button.css';
 import './globals.css';
 
 const inter = Inter({

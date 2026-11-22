@@ -1,4 +1,8 @@
-import { VerifyEmail } from '@/features/auth/ui/VerifyEmail';
+import { AuthLayout } from '@/features/auth/ui/AuthLayout';
+import { VerifyEmailStatus } from '@/features/auth/ui/VerifyEmailStatus';
+
+// o token vai na query; não repassa a URL no header Referer
+export const metadata = { referrer: 'no-referrer' as const };
 
 export default async function VerifyEmailPage({
   searchParams,
@@ -6,9 +10,10 @@ export default async function VerifyEmailPage({
   searchParams: Promise<{ token?: string }>;
 }) {
   const { token } = await searchParams;
+
   return (
-    <main>
-      <VerifyEmail token={token} />
-    </main>
+    <AuthLayout>
+      <VerifyEmailStatus token={token} />
+    </AuthLayout>
   );
 }
