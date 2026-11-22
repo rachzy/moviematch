@@ -37,6 +37,10 @@ Exemplo de referência: `auth` + `users`. Fluxo: controller → service → repo
 - Imports usam o alias `@/` (raiz de `apps/www`). Para novas requisições, sempre use `shared/lib/http.ts`.
 - A API libera CORS (`app.enableCors()`) porque o browser chama `NEXT_PUBLIC_API_URL` (padrão `http://localhost:3001`) direto.
 
+## UI e Storybook (obrigatório para qualquer agente)
+
+Toda criação ou alteração de componente de UI em `apps/www` (`features/*/ui`, `shared`, estilos em `app/globals.css`) **deve** vir acompanhada da story correspondente (`*.stories.tsx` ao lado do componente). Delegue isso à skill `storybook-stories` (`.claude/skills/storybook-stories/SKILL.md`): invoque-a antes de dar a tarefa de UI por concluída, e valide com `npm run build-storybook -w www`.
+
 ## Docker
 
 - Tudo em `docker/`: um único `Dockerfile` (contexto de build = raiz do repo) com targets `dev` (usado por `compose.yaml`), `api` e `www` (usados por `compose.prod.yaml`). A `.env` de produção fica em `docker/.env`.
