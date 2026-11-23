@@ -1,40 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import type { SearchMoviesDto } from './movies.schemas';
-import { TmdbClient, type MovieSummary } from './tmdb.client';
-
-const LIMIT = 50;
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class MoviesService {
-  constructor(private readonly tmdb: TmdbClient) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async search(dto: SearchMoviesDto) {
-    const q = dto.q?.trim();
-    const genre = dto.genre?.trim();
-    let movies: MovieSummary[] = [];
-    const genreId = genre ? await this.tmdb.findGenreId(genre) : undefined;
-    if (genre && genreId === null) return [];
-
-    if (q) {
-      const [byTitle, byActor] = await Promise.all([
-        this.tmdb.searchByTitle(q),
-        this.tmdb.searchByActor(q),
-      ]);
-      const seen = new Set<number>();
-      movies = [...byTitle, ...byActor].filter(
-        (m) => !seen.has(m.id) && seen.add(m.id),
-      );
-      if (genreId) movies = movies.filter((m) => m.genreIds.includes(genreId));
-    } else if (genreId) {
-      movies = await this.tmdb.discoverByGenre(genreId);
-    }
-
-    return movies.slice(0, LIMIT).map(({ genreIds: _genreIds, ...m }) => m);
+  getUserRating(userId: string, movieId: number) {
+    return this.prisma.rating.findUnique({
+      where: { userId_movieId: { userId, movieId } },
+    });
   }
 
-  async findOne(id: number) {
-    const movie = await this.tmdb.getMovie(id);
-    if (!movie) throw new NotFoundException('Filme não encontrado');
-    return movie;
+  upsertUserRating(userId: string, movieId: number, value: number) {
+    return this.prisma.rating.upsert({
+      where: { userId_movieId: { userId, movieId } },
+      update: { value },
+      create: { userId, movieId, value },
+    });
   }
 }
