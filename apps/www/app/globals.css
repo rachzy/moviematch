@@ -168,3 +168,169 @@
   color: #f87171;
   background: #f8717120;
 }
+/* Estrelas: ajustes do design (SCRUM-71/72)*/
+.stars {
+  --star-on: #f59e0b;
+  --star-off: #475569;
+}
+.star {
+  font-size: 34px;
+}
+.star svg {
+  display: block;
+  fill: none;
+  stroke: var(--star-off);
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+}
+.star.on svg {
+  fill: var(--star-on);
+  stroke: var(--star-on);
+}
+.stars.readonly .star:has(input:disabled) {
+  opacity: 1;
+  cursor: default;
+}
+
+/* Avaliação do filme (SCRUM-72) */
+.rating-card {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 560px;
+  padding: 24px;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  background: #111827;
+  color: #f1f5f9;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.rating-card.failed {
+  border-color: #7f1d1d;
+}
+.rating-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rating-head h2 {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 19px;
+}
+.rating-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #4ade80;
+  background: #0d2b1d;
+  font-size: 12px;
+  font-weight: 700;
+}
+.rating-sub {
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 16px;
+}
+.rating-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+.rating-label {
+  color: #cbd5e1;
+  font-size: 15px;
+}
+.rating-label b {
+  color: #f1f5f9;
+}
+.rating-error {
+  padding: 10px 12px;
+  border: 1px solid #7f1d1d;
+  border-radius: 8px;
+  color: #fca5a5;
+  background: #2b1215;
+  font-size: 13px;
+  line-height: 16px;
+}
+.rating-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: #2563eb;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.rating-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+.rating-btn:disabled {
+  color: #ffffffb3;
+  background: #2563eb73;
+  cursor: not-allowed;
+}
+.rating-hint {
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 15px;
+  text-align: center;
+}
+.rating-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ffffff59;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: rating-spin 0.8s linear infinite;
+}
+@keyframes rating-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rating-toast {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  max-width: 380px;
+  padding: 14px 16px;
+  border: 1px solid #166534;
+  border-left: 4px solid #22c55e;
+  border-radius: 12px;
+  color: #f1f5f9;
+  background: #111827;
+  box-shadow: 0 10px 30px #00000080;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.rating-toast.error {
+  border-color: #7f1d1d;
+  border-left-color: #f87171;
+}
+.rating-toast strong {
+  font-size: 14px;
+}
+.rating-toast p {
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 16px;
+}
+.rating-toast button {
+  border: 0;
+  color: #94a3b8;
+  background: none;
+  font-size: 14px;
+  cursor: pointer;
+}

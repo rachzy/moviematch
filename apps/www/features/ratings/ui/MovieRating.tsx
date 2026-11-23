@@ -1,101 +1,181 @@
 'use client';
 
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { getMyRating, saveRating } from '../api';
+import type { Rating } from '../types';
 import { StarRating } from './StarRating';
 
-type Alert = { ok: boolean; text: string } | null;
+const LABELS = ['', 'Ruim', 'Regular', 'Bom', 'Muito bom', 'Excelente'];
 
-function errorMessage(err: unknown) {
-  const status = axios.isAxiosError(err) ? err.response?.status : undefined;
-  if (status === 401) return 'Faça login para avaliar este filme.';
-  if (status === 400) return 'Nota inválida. Escolha de 1 a 5 estrelas.';
-  return 'Não foi possível salvar sua nota. Tente novamente.';
+type Toast = { ok: boolean; title: string; text: string } | null;
+
+function formatDate(iso: string) {
+  const d = new Date(iso);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${day}/${month}`;
 }
 
-export function MovieRating({ movieId }: { movieId: string }) {
-  const [saved, setSaved] = useState(0); // 0 = ainda sem nota salva
-  const [draft, setDraft] = useState(0); // nota escolhida, antes de enviar
+export function MovieRating({ movieId }: { movieId: number }) {
+  const [saved, setSaved] = useState<Rating | null>(null);
+  const [draft, setDraft] = useState(0);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [alert, setAlert] = useState<Alert>(null);
+  const [failed, setFailed] = useState(false);
+  const [toast, setToast] = useState<Toast>(null);
 
   useEffect(() => {
     let cancelled = false;
     getMyRating(movieId)
-      .then((rating) => {
-        if (cancelled) return;
-        setSaved(rating.value);
-        setDraft(rating.value);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        // 404 = o usuário ainda não avaliou: não é erro
-        if (axios.isAxiosError(err) && err.response?.status === 404) return;
-        setAlert({ ok: false, text: errorMessage(err) });
-      })
+      .then((rating) => !cancelled && setSaved(rating))
+      .catch(
+        () =>
+          !cancelled &&
+          setToast({
+            ok: false,
+            title: 'Não foi possível carregar',
+            text: 'Verifique sua conexão e tente novamente.',
+          }),
+      )
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
     };
   }, [movieId]);
 
+  // A mensagem some sozinha depois de 4 segundos.
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
   function onChange(value: number) {
     setDraft(value);
-    setAlert(null);
+    setFailed(false);
   }
 
   async function onSubmit() {
-    if (draft === 0) {
-      setAlert({ ok: false, text: 'Escolha uma nota de 1 a 5 estrelas.' });
-      return;
-    }
+    if (!draft || sending) return;
     setSending(true);
-    setAlert(null);
+    setFailed(false);
     try {
-      const rating = await saveRating(movieId, draft);
-      setSaved(rating.value);
-      setAlert({ ok: true, text: 'Nota salva com sucesso!' });
-    } catch (err) {
-      setAlert({ ok: false, text: errorMessage(err) });
+      setSaved(await saveRating(movieId, draft));
+      setToast({
+        ok: true,
+        title: 'Avaliação salva!',
+        text: 'Sua nota já conta para seus matches.',
+      });
+    } catch {
+      setFailed(true);
+      setToast({
+        ok: false,
+        title: 'Não foi possível salvar',
+        text: 'Verifique sua conexão e tente novamente.',
+      });
     } finally {
       setSending(false);
     }
   }
 
-  const busy = loading || sending;
+  const choice = saved ? saved.value : draft;
+
+  const subtitle = sending
+    ? 'Salvando sua nota…'
+    : saved
+      ? 'Sua nota já entra no cálculo de match com outras pessoas.'
+      : failed
+        ? 'Sua nota não foi perdida. Tente enviar de novo.'
+        : draft
+          ? 'Confira a nota antes de enviar. Cada filme só pode ser avaliado uma vez.'
+          : 'Escolha de 1 a 5 estrelas. Cada filme só pode ser avaliado uma vez.';
 
   return (
-    <section className="rating-box">
-      <h2>Sua avaliação</h2>
-      <p className="rating-saved">
-        {loading
-          ? 'Carregando...'
-          : saved
-            ? `Sua nota atual: ${saved} de 5`
-            : 'Você ainda não avaliou este filme.'}
-      </p>
-
-      <StarRating value={draft} onChange={onChange} disabled={busy} />
-
-      <button
-        type="button"
-        className="rating-btn"
-        onClick={onSubmit}
-        disabled={busy}
+    <>
+      <section
+        className={failed ? 'rating-card failed' : 'rating-card'}
+        aria-busy={loading || sending}
       >
-        {sending ? 'Enviando...' : saved ? 'Atualizar nota' : 'Enviar nota'}
-      </button>
+        <header className="rating-head">
+          <h2>Sua avaliação</h2>
+          {saved && (
+            <span className="rating-badge">
+              ✓ Avaliado em {formatDate(saved.createdAt)}
+            </span>
+          )}
+        </header>
+        <p className="rating-sub">{subtitle}</p>
 
-      {alert && (
-        <p
-          className={alert.ok ? 'rating-alert ok' : 'rating-alert error'}
-          role={alert.ok ? 'status' : 'alert'}
+        <div className="rating-row">
+          <StarRating
+            value={choice}
+            onChange={onChange}
+            disabled={loading || sending}
+            readOnly={!!saved}
+          />
+          <span className="rating-label">
+            {choice ? (
+              <>
+                <b>{choice}</b> · {LABELS[choice]}
+              </>
+            ) : (
+              'Escolha uma nota'
+            )}
+          </span>
+        </div>
+
+        {failed && (
+          <p className="rating-error" role="alert">
+            Não foi possível salvar sua avaliação. Verifique sua conexão e tente
+            novamente.
+          </p>
+        )}
+
+        {!saved && (
+          <>
+            <button
+              type="button"
+              className="rating-btn"
+              onClick={onSubmit}
+              disabled={loading || sending || !draft}
+            >
+              {sending ? (
+                <>
+                  <span className="rating-spinner" /> Enviando…
+                </>
+              ) : failed ? (
+                'Tentar novamente'
+              ) : (
+                'Enviar avaliação'
+              )}
+            </button>
+            {!draft && !loading && (
+              <p className="rating-hint">
+                Escolha uma nota para liberar o botão.
+              </p>
+            )}
+          </>
+        )}
+      </section>
+
+      {toast && (
+        <div
+          className={toast.ok ? 'rating-toast ok' : 'rating-toast error'}
+          role={toast.ok ? 'status' : 'alert'}
         >
-          {alert.text}
-        </p>
+          <div>
+            <strong>{toast.title}</strong>
+            <p>{toast.text}</p>
+          </div>
+          <button
+            type="button"
+            aria-label="Fechar mensagem"
+            onClick={() => setToast(null)}
+          >
+            ✕
+          </button>
+        </div>
       )}
-    </section>
+    </>
   );
 }
