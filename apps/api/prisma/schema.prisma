@@ -20,4 +20,35 @@ model User {
   verificationSentAt DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
+  reviews            Review[]
+  matchesAsA         Match[]   @relation("MatchUserA")
+  matchesAsB         Match[]   @relation("MatchUserB")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  movieId   Int
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId])
+  @@index([movieId])
+}
+
+model Match {
+  id        String   @id @default(uuid())
+  userAId   String
+  userBId   String
+  score     Float    @default(0)
+  updatedAt DateTime @updatedAt
+
+  userA User @relation("MatchUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB User @relation("MatchUserB", fields: [userBId], references: [id], onDelete: Cascade)
+
+  @@unique([userAId, userBId])
 }
