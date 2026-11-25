@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Rating } from './rating.entity';
 
 const toEntity = (row: RatingRow) =>
-  new Rating(row.userId, row.movieId, row.value);
+  new Rating(row.userId, row.movieId, row.value, row.comment, row.createdAt);
 
 // Filmes avaliados em comum com outro usuário, já agregados no banco.
 export type SharedRatings = {
@@ -29,13 +29,26 @@ export class RatingRepository {
     return row ? toEntity(row) : null;
   }
 
-  async upsert(userId: string, movieId: number, value: number) {
+  async upsert(
+    userId: string,
+    movieId: number,
+    value: number,
+    comment: string | null,
+  ) {
     const row = await this.prisma.rating.upsert({
       where: { userId_movieId: { userId, movieId } },
-      update: { value },
-      create: { userId, movieId, value },
+      update: { value, comment },
+      create: { userId, movieId, value, comment },
     });
     return toEntity(row);
+  }
+
+  // Filtra pelo autor no próprio DELETE: só apaga a avaliação de quem pediu.
+  async remove(userId: string, movieId: number) {
+    const { count } = await this.prisma.rating.deleteMany({
+      where: { userId, movieId },
+    });
+    return count > 0;
   }
 
   // Só carrega quem tem ao menos `minShared` filmes em comum (nota 1..5 => diferença máx. 4).

@@ -17,8 +17,8 @@ export class MoviesService {
 
     if (q) {
       const [byTitle, byActor] = await Promise.all([
-        this.tmdb.searchByTitle(q),
-        this.tmdb.searchByActor(q),
+        dto.by === 'actor' ? [] : this.tmdb.searchByTitle(q),
+        dto.by === 'title' ? [] : this.tmdb.searchByActor(q),
       ]);
       const seen = new Set<number>();
       movies = [...byTitle, ...byActor].filter(

@@ -43,6 +43,22 @@ describe('MoviesService', () => {
       expect(result.map((r) => r.id)).toEqual([1, 2, 3]);
     });
 
+    it('by=title busca só no título', async () => {
+      tmdb.searchByTitle.mockResolvedValue([m(1)]);
+      tmdb.searchByActor.mockResolvedValue([m(2)]);
+      const result = await service.search({ q: 'x', by: 'title' });
+      expect(result.map((r) => r.id)).toEqual([1]);
+      expect(tmdb.searchByActor).not.toHaveBeenCalled();
+    });
+
+    it('by=actor busca só no elenco', async () => {
+      tmdb.searchByTitle.mockResolvedValue([m(1)]);
+      tmdb.searchByActor.mockResolvedValue([m(2)]);
+      const result = await service.search({ q: 'x', by: 'actor' });
+      expect(result.map((r) => r.id)).toEqual([2]);
+      expect(tmdb.searchByTitle).not.toHaveBeenCalled();
+    });
+
     it('q + genre mantém só filmes do gênero', async () => {
       tmdb.findGenreId.mockResolvedValue(28);
       tmdb.searchByTitle.mockResolvedValue([m(1, [28]), m(2, [35])]);

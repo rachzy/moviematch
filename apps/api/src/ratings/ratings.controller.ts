@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
   Put,
@@ -32,6 +34,15 @@ export class RatingsController {
     @Param('id', ParseIntPipe) movieId: number,
     @Body(new ZodValidationPipe(upsertRatingSchema)) body: UpsertRatingDto,
   ) {
-    return this.ratings.upsert(user.id, movieId, body.value);
+    return this.ratings.upsert(user.id, movieId, body);
+  }
+
+  @Delete()
+  @HttpCode(204)
+  remove(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseIntPipe) movieId: number,
+  ) {
+    return this.ratings.remove(user.id, movieId);
   }
 }

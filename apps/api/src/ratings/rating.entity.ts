@@ -4,9 +4,16 @@ export class Rating {
     readonly userId: string,
     readonly movieId: number,
     readonly value: number,
+    readonly comment: string | null = null,
+    readonly createdAt: Date = new Date(),
   ) {}
 
   toPublic() {
-    return { movieId: this.movieId, value: this.value };
+    return {
+      movieId: this.movieId,
+      value: this.value,
+      comment: this.comment,
+      createdAt: this.createdAt.toISOString(),
+    };
   }
 }
