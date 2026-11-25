@@ -5,6 +5,7 @@ export type MovieSummary = {
   title: string;
   year: number | null;
   posterUrl: string | null;
+  rating: number | null; // média do TMDB convertida para 0–5 (null sem votos)
   genreIds: number[];
 };
 
@@ -12,6 +13,8 @@ export type MovieDetails = Omit<MovieSummary, 'genreIds'> & {
   overview: string;
   genres: string[];
   cast: string[];
+  runtime: number | null; // minutos
+  voteCount: number;
 };
 
 type TmdbMovie = {
@@ -20,6 +23,8 @@ type TmdbMovie = {
   release_date?: string;
   poster_path?: string | null;
   genre_ids?: number[];
+  vote_average?: number;
+  vote_count?: number;
 };
 
 const BASE = 'https://api.themoviedb.org/3';
@@ -38,6 +43,9 @@ const toSummary = (m: TmdbMovie): MovieSummary => ({
   title: m.title,
   year: m.release_date ? Number(m.release_date.slice(0, 4)) : null,
   posterUrl: m.poster_path ? IMAGE + m.poster_path : null,
+  rating: m.vote_count
+    ? Math.round(((m.vote_average ?? 0) / 2) * 10) / 10
+    : null,
   genreIds: m.genre_ids ?? [],
 });
 
@@ -97,19 +105,36 @@ export class TmdbClient {
     return this.list('/discover/movie', { with_genres: genreId });
   }
 
-  async findGenreId(name: string) {
+  popular() {
+    return this.list('/movie/popular', {});
+  }
+
+  // Lista de gêneros do TMDB, buscada uma vez só.
+  private loadGenres() {
     this.genres ??= this.get<{ genres: { id: number; name: string }[] }>(
       '/genre/movie/list',
     ).then((b) => b?.genres ?? []);
+    return this.genres;
+  }
+
+  async findGenreId(name: string) {
     const wanted = normalize(name);
-    const found = (await this.genres).find((g) => normalize(g.name) === wanted);
+    const found = (await this.loadGenres()).find(
+      (g) => normalize(g.name) === wanted,
+    );
     return found?.id ?? null;
+  }
+
+  async genreName(id: number | undefined) {
+    if (id === undefined) return null;
+    return (await this.loadGenres()).find((g) => g.id === id)?.name ?? null;
   }
 
   async getMovie(id: number): Promise<MovieDetails | null> {
     const m = await this.get<
       TmdbMovie & {
         overview: string;
+        runtime?: number | null;
         genres: { name: string }[];
         credits: { cast: { name: string }[] };
       }
@@ -121,6 +146,8 @@ export class TmdbClient {
       overview: m.overview,
       genres: m.genres.map((g) => g.name),
       cast: m.credits.cast.slice(0, 10).map((c) => c.name),
+      runtime: m.runtime || null,
+      voteCount: m.vote_count ?? 0,
     };
   }
 }

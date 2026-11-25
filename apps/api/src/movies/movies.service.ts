@@ -15,7 +15,8 @@ export class MoviesService {
     const genreId = genre ? await this.tmdb.findGenreId(genre) : undefined;
     if (genre && genreId === null) return [];
 
-    if (q) {
+    if (!q && !genre) movies = await this.tmdb.popular();
+    else if (q) {
       const [byTitle, byActor] = await Promise.all([
         dto.by === 'actor' ? [] : this.tmdb.searchByTitle(q),
         dto.by === 'title' ? [] : this.tmdb.searchByActor(q),
@@ -29,7 +30,13 @@ export class MoviesService {
       movies = await this.tmdb.discoverByGenre(genreId);
     }
 
-    return movies.slice(0, LIMIT).map(({ genreIds: _genreIds, ...m }) => m);
+    // Troca a lista de ids pelo nome do gênero principal, mostrado no cartão.
+    return Promise.all(
+      movies.slice(0, LIMIT).map(async ({ genreIds, ...m }) => ({
+        ...m,
+        genre: await this.tmdb.genreName(genreIds[0]),
+      })),
+    );
   }
 
   async findOne(id: number) {

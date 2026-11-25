@@ -41,6 +41,7 @@ describe('TmdbClient', () => {
           title: 'Amélie',
           year: 2001,
           posterUrl: 'https://image.tmdb.org/t/p/w500/x.jpg',
+          rating: null,
           genreIds: [35, 10749],
         },
       ]);
@@ -108,6 +109,35 @@ describe('TmdbClient', () => {
     });
   });
 
+  describe('nota', () => {
+    it('converte a média do TMDB (0–10) para 0–5 com uma casa', async () => {
+      fetchFn.mockResolvedValue(
+        json({ results: [{ ...movie, vote_average: 8.66, vote_count: 10 }] }),
+      );
+      const [m] = await client().searchByTitle('x');
+      expect(m.rating).toBe(4.3);
+    });
+  });
+
+  describe('popular e genreName', () => {
+    it('popular chama /movie/popular', async () => {
+      fetchFn.mockResolvedValue(json({ results: [movie] }));
+      expect(await client().popular()).toHaveLength(1);
+      expect(calledUrl().pathname).toBe('/3/movie/popular');
+    });
+
+    it('genreName usa a mesma lista cacheada', async () => {
+      fetchFn.mockResolvedValue(
+        json({ genres: [{ id: 35, name: 'Comédia' }] }),
+      );
+      const c = client();
+      expect(await c.genreName(35)).toBe('Comédia');
+      expect(await c.genreName(99)).toBeNull();
+      expect(await c.genreName(undefined)).toBeNull();
+      expect(fetchFn).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('discoverByGenre', () => {
     it('usa with_genres', async () => {
       fetchFn.mockResolvedValue(json({ results: [movie] }));
@@ -122,6 +152,9 @@ describe('TmdbClient', () => {
         json({
           ...movie,
           overview: 'sinopse',
+          runtime: 112,
+          vote_average: 8.6,
+          vote_count: 1284,
           genres: [{ id: 35, name: 'Comédia' }],
           credits: {
             cast: Array.from({ length: 15 }, (_, i) => ({ name: `Ator ${i}` })),
@@ -139,6 +172,9 @@ describe('TmdbClient', () => {
         id: 194,
         overview: 'sinopse',
         genres: ['Comédia'],
+        runtime: 112,
+        rating: 4.3,
+        voteCount: 1284,
       });
       expect(result?.cast).toHaveLength(10);
     });

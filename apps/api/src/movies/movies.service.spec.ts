@@ -7,6 +7,7 @@ const m = (id: number, genreIds: number[] = []): MovieSummary => ({
   title: `Filme ${id}`,
   year: 2000,
   posterUrl: null,
+  rating: 4.2,
   genreIds,
 });
 
@@ -16,6 +17,8 @@ describe('MoviesService', () => {
     searchByActor: jest.fn(),
     discoverByGenre: jest.fn(),
     findGenreId: jest.fn(),
+    genreName: jest.fn(),
+    popular: jest.fn(),
     getMovie: jest.fn(),
   };
   const service = new MoviesService(tmdb as unknown as TmdbClient);
@@ -24,13 +27,26 @@ describe('MoviesService', () => {
     jest.resetAllMocks();
     tmdb.searchByTitle.mockResolvedValue([]);
     tmdb.searchByActor.mockResolvedValue([]);
+    tmdb.genreName.mockImplementation(async (id?: number) =>
+      id === 28 ? 'Ação' : null,
+    );
   });
 
   describe('search', () => {
     it.each([{}, { q: '' }, { q: '   ' }])(
-      'sem q nem genre devolve [] sem chamar o TMDB (%j)',
+      'sem q nem genre devolve os populares (%j)',
       async (dto) => {
-        expect(await service.search(dto)).toEqual([]);
+        tmdb.popular.mockResolvedValue([m(7, [28])]);
+        expect(await service.search(dto)).toEqual([
+          {
+            id: 7,
+            title: 'Filme 7',
+            year: 2000,
+            posterUrl: null,
+            rating: 4.2,
+            genre: 'Ação',
+          },
+        ]);
         expect(tmdb.searchByTitle).not.toHaveBeenCalled();
         expect(tmdb.discoverByGenre).not.toHaveBeenCalled();
       },
@@ -91,6 +107,8 @@ describe('MoviesService', () => {
         title: 'Filme 0',
         year: 2000,
         posterUrl: null,
+        rating: 4.2,
+        genre: null,
       });
     });
   });
