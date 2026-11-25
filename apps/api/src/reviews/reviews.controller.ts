@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { CurrentUser } from '../auth/current-user.decorator';
+import { CurrentUser, type AuthUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { updateReviewSchema, type UpdateReviewDto } from './reviews.schemas';
@@ -22,19 +22,17 @@ export class ReviewsController {
   @Patch(':id')
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @CurrentUser() user: { id: string } | { sub: string },
+    @CurrentUser() user: AuthUser,
     @Body(new ZodValidationPipe(updateReviewSchema)) dto: UpdateReviewDto,
   ) {
-    const userId = 'id' in user ? user.id : user.sub;
-    return this.reviews.update(id, userId, dto);
+    return this.reviews.update(id, user.id, dto);
   }
 
   @Delete(':id')
   remove(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @CurrentUser() user: { id: string } | { sub: string },
+    @CurrentUser() user: AuthUser,
   ) {
-    const userId = 'id' in user ? user.id : user.sub;
-    return this.reviews.remove(id, userId);
+    return this.reviews.remove(id, user.id);
   }
-} 
+}
