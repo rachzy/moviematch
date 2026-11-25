@@ -11,6 +11,8 @@
   --primary-hover: #1d4ed8;
   --link-dark: #60a5fa;
   --stars: #f59e0b;
+  --star-on: var(--stars);
+  --star-off: var(--border);
   --success: #22c55e;
   --text: #f1f5f9;
   --text-primary: #f1f5f9;
