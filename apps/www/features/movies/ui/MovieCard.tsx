@@ -18,6 +18,14 @@ export function MovieCard({ movie }: { movie: Movie }) {
           {movie.year && <span>{movie.year}</span>}
         </div>
       </Link>
+      {/* Atalho: abre a página do filme já na avaliação. */}
+      <Link
+        href={`/movies/${movie.id}#avaliacao`}
+        className="movie-rate"
+        aria-label={`Avaliar ${movie.title}`}
+      >
+        ★ Avaliar
+      </Link>
     </li>
   );
 }

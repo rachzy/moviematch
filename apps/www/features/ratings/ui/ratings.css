@@ -1,0 +1,65 @@
+/* Comentário, editar e excluir avaliação (SCRUM-15) */
+.rating-comment {
+  display: grid;
+  gap: 6px;
+  color: var(--text-support);
+  font-size: 13px;
+}
+.rating-comment textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--surface-hover);
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+.rating-comment textarea:focus {
+  border-color: var(--focus);
+  outline: none;
+}
+.rating-quote {
+  padding: 10px 12px;
+  border-left: 3px solid var(--link-dark);
+  border-radius: 4px;
+  color: var(--text-support);
+  background: var(--surface-hover);
+  font-size: 14px;
+  white-space: pre-line;
+}
+.rating-actions {
+  display: flex;
+  gap: 12px;
+}
+.rating-actions .btn {
+  flex: 1;
+}
+.btn-danger {
+  color: #fff;
+  background: #dc2626;
+}
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.rating-modal form {
+  display: grid;
+  gap: 16px;
+}
+.rating-modal .rating-error {
+  margin: 0 0 16px;
+}
+.rating-modal form .rating-error {
+  margin: 0;
+}
+.rating-modal .modal-actions {
+  margin-top: 8px;
+}
+.rating-before {
+  margin: 0 !important;
+  font-size: 13px;
+}

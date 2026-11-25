@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getMyRating, saveRating } from '../api';
-import type { Rating } from '../types';
+import { deleteRating, getMyRating, saveRating } from '../api';
+import { RATING_LABELS, type Rating } from '../types';
+import { DeleteRatingModal } from './DeleteRatingModal';
+import { EditRatingModal } from './EditRatingModal';
 import { StarRating } from './StarRating';
-
-const LABELS = ['', 'Ruim', 'Regular', 'Bom', 'Muito bom', 'Excelente'];
+import './ratings.css';
 
 type Toast = { ok: boolean; title: string; text: string } | null;
+type Modal = 'edit' | 'delete' | null;
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -19,12 +21,16 @@ function formatDate(iso: string) {
 export function MovieRating({ movieId }: { movieId: number }) {
   const [saved, setSaved] = useState<Rating | null>(null);
   const [draft, setDraft] = useState(0);
+  const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [toast, setToast] = useState<Toast>(null);
+  const [modal, setModal] = useState<Modal>(null);
+  const [modalBusy, setModalBusy] = useState(false);
+  const [modalError, setModalError] = useState(false);
 
   // Falha no GET NÃO é "sem avaliação": mostra erro com retry em vez do formulário.
   useEffect(() => {
@@ -57,7 +63,7 @@ export function MovieRating({ movieId }: { movieId: number }) {
     setSending(true);
     setFailed(false);
     try {
-      setSaved(await saveRating(movieId, draft));
+      setSaved(await saveRating(movieId, draft, comment));
       setToast({
         ok: true,
         title: 'Avaliação salva!',
@@ -75,6 +81,50 @@ export function MovieRating({ movieId }: { movieId: number }) {
     }
   }
 
+  function openModal(m: Modal) {
+    setModalError(false);
+    setModal(m);
+  }
+
+  async function onEdit(value: number, newComment: string) {
+    setModalBusy(true);
+    setModalError(false);
+    try {
+      setSaved(await saveRating(movieId, value, newComment));
+      setModal(null);
+      setToast({
+        ok: true,
+        title: 'Avaliação atualizada!',
+        text: 'Seus matches já foram recalculados com a nova nota.',
+      });
+    } catch {
+      setModalError(true);
+    } finally {
+      setModalBusy(false);
+    }
+  }
+
+  async function onDelete() {
+    setModalBusy(true);
+    setModalError(false);
+    try {
+      await deleteRating(movieId);
+      setSaved(null);
+      setDraft(0);
+      setComment('');
+      setModal(null);
+      setToast({
+        ok: true,
+        title: 'Avaliação excluída',
+        text: 'Este filme não conta mais para seus matches.',
+      });
+    } catch {
+      setModalError(true);
+    } finally {
+      setModalBusy(false);
+    }
+  }
+
   const choice = saved ? saved.value : draft;
 
   const subtitle = sending
@@ -84,12 +134,13 @@ export function MovieRating({ movieId }: { movieId: number }) {
       : failed
         ? 'Sua nota não foi perdida. Tente enviar de novo.'
         : draft
-          ? 'Confira a nota antes de enviar. Cada filme só pode ser avaliado uma vez.'
-          : 'Escolha de 1 a 5 estrelas. Cada filme só pode ser avaliado uma vez.';
+          ? 'Confira a nota antes de enviar. Depois você pode editar ou excluir.'
+          : 'Escolha de 1 a 5 estrelas. Depois você pode editar ou excluir.';
 
   return (
     <>
       <section
+        id="avaliacao"
         className={failed ? 'rating-card failed' : 'rating-card'}
         aria-busy={loading || sending}
       >
@@ -113,7 +164,7 @@ export function MovieRating({ movieId }: { movieId: number }) {
           <span className="rating-label">
             {choice ? (
               <>
-                <b>{choice}</b> · {LABELS[choice]}
+                <b>{choice}</b> · {RATING_LABELS[choice]}
               </>
             ) : (
               'Escolha uma nota'
@@ -143,8 +194,41 @@ export function MovieRating({ movieId }: { movieId: number }) {
           </p>
         )}
 
+        {saved && (
+          <>
+            {saved.comment && <p className="rating-quote">{saved.comment}</p>}
+            <div className="rating-actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => openModal('edit')}
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => openModal('delete')}
+              >
+                Excluir
+              </button>
+            </div>
+          </>
+        )}
+
         {!saved && !loadError && (
           <>
+            <label className="rating-comment">
+              Comentário (opcional)
+              <textarea
+                value={comment}
+                maxLength={500}
+                rows={3}
+                placeholder="O que você achou do filme?"
+                disabled={loading || sending}
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </label>
             <button
               type="button"
               className="rating-btn"
@@ -169,6 +253,24 @@ export function MovieRating({ movieId }: { movieId: number }) {
           </>
         )}
       </section>
+
+      {saved && (
+        <EditRatingModal
+          open={modal === 'edit'}
+          rating={saved}
+          saving={modalBusy}
+          error={modalError}
+          onCancel={() => setModal(null)}
+          onSave={onEdit}
+        />
+      )}
+      <DeleteRatingModal
+        open={modal === 'delete'}
+        deleting={modalBusy}
+        error={modalError}
+        onCancel={() => setModal(null)}
+        onConfirm={onDelete}
+      />
 
       {toast && (
         <div

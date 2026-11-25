@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { searchMovies } from '../api';
-import type { Movie } from '../types';
+import type { Movie, SearchBy } from '../types';
 import { GenreFilter } from './GenreFilter';
 import { SearchBar } from './SearchBar';
+import { SearchByFilter } from './SearchByFilter';
 import { SearchResults } from './SearchResults';
 import './movies.css';
 
@@ -13,11 +14,12 @@ type Status = 'idle' | 'loading' | 'done' | 'error';
 export function MovieSearch() {
   const [text, setText] = useState('');
   const [genre, setGenre] = useState<string | null>(null);
+  const [by, setBy] = useState<SearchBy | null>(null);
   const [status, setStatus] = useState<Status>('idle');
   const [movies, setMovies] = useState<Movie[]>([]);
   const [searched, setSearched] = useState('');
 
-  async function run(q: string, g: string | null) {
+  async function run(q: string, g: string | null, b = by) {
     const term = q.trim();
     setSearched(term);
     if (!term && !g) {
@@ -27,7 +29,11 @@ export function MovieSearch() {
     setStatus('loading');
     try {
       setMovies(
-        await searchMovies({ q: term || undefined, genre: g ?? undefined }),
+        await searchMovies({
+          q: term || undefined,
+          genre: g ?? undefined,
+          by: term && b ? b : undefined,
+        }),
       );
       setStatus('done');
     } catch {
@@ -38,6 +44,11 @@ export function MovieSearch() {
   function chooseGenre(g: string | null) {
     setGenre(g);
     void run(text, g);
+  }
+
+  function chooseBy(b: SearchBy | null) {
+    setBy(b);
+    if (text.trim()) void run(text, genre, b);
   }
 
   function clear() {
@@ -57,6 +68,7 @@ export function MovieSearch() {
         onChange={setText}
         onSubmit={() => run(text, genre)}
       />
+      <SearchByFilter value={by} onChange={chooseBy} />
       <GenreFilter value={genre} onChange={chooseGenre} />
       <SearchResults
         status={status}
