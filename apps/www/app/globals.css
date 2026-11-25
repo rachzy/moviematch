@@ -63,8 +63,6 @@
 }
 /* Componente de estrelas (SCRUM-71/72) */
 .stars {
-  --star-on: #f59e0b;
-  --star-off: #475569;
   display: inline-flex;
   gap: 4px;
 }
@@ -100,7 +98,7 @@
 }
 .star:has(input:focus-visible) {
   border-radius: 4px;
-  outline: 2px solid #60a5fa;
+  outline: 2px solid var(--link-dark);
   outline-offset: 2px;
 }
 .star:has(input:disabled) {
