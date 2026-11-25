@@ -13,6 +13,14 @@ const meta = {
   title: 'Movies/SearchResults',
   component: SearchResults,
   args: { status: 'done', movies, query: 'ultim', onClear: fn() },
+  parameters: { layout: 'fullscreen' },
+  decorators: [
+    (Story) => (
+      <div style={{ maxWidth: 928, margin: '0 auto', padding: 24 }}>
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof SearchResults>;
 export default meta;
 type Story = StoryObj<typeof meta>;

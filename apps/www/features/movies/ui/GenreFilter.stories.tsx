@@ -8,6 +8,14 @@ const meta = {
   title: 'Movies/GenreFilter',
   component: GenreFilter,
   args: { value: null, onChange: fn() },
+  parameters: { layout: 'fullscreen' },
+  decorators: [
+    (Story) => (
+      <div style={{ maxWidth: 928, margin: '0 auto', padding: 24 }}>
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof GenreFilter>;
 export default meta;
 type Story = StoryObj<typeof meta>;

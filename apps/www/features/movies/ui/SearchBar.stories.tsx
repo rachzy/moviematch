@@ -8,6 +8,14 @@ const meta = {
   title: 'Movies/SearchBar',
   component: SearchBar,
   args: { value: '', onChange: fn(), onSubmit: fn() },
+  parameters: { layout: 'fullscreen' },
+  decorators: [
+    (Story) => (
+      <div style={{ maxWidth: 928, margin: '0 auto', padding: 24 }}>
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof SearchBar>;
 export default meta;
 type Story = StoryObj<typeof meta>;
