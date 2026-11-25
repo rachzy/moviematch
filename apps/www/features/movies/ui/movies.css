@@ -16,6 +16,48 @@
   display: flex;
   gap: 16px;
 }
+
+/* Seletor segmentado Filme | Ator */
+.search-bar .search-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  height: 52px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.search-bar .search-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background-color: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.search-bar .search-mode-btn:hover:not([aria-pressed='true']) {
+  background-color: var(--surface-hover);
+  color: var(--text);
+}
+
+.search-bar .search-mode-btn[aria-pressed='true'] {
+  background-color: var(--primary, #2563eb);
+  color: #ffffff;
+}
+
 .search-field {
   flex: 1;
   display: flex;
@@ -60,7 +102,7 @@
   padding: 0 28px;
   border: 0;
   border-radius: 12px;
-  background: var(--primary);
+  background: var(--primary, #2563eb);
   color: #fff;
   font: inherit;
   font-weight: 700;
@@ -74,13 +116,35 @@
   cursor: progress;
 }
 
+/* Linha única de filtros: Gêneros + Estúdio lado a lado */
+.filters-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 20px;
+}
+
+.filters-toolbar .genre-filter {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.filters-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
 .genre-filter {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin: 16px 0 24px;
+  margin: 0;
 }
+
 .genre-label {
   display: flex;
   align-items: center;
@@ -89,6 +153,7 @@
   font-size: 0.8125rem;
   color: var(--text-secondary);
 }
+
 .chip {
   padding: 8px 16px;
   border: 1px solid var(--border);
@@ -103,10 +168,189 @@
   background: var(--surface-hover);
 }
 .chip[aria-pressed='true'] {
-  background: var(--primary);
-  border-color: var(--primary);
+  background: var(--primary, #2563eb);
+  border-color: var(--primary, #2563eb);
   color: #fff;
   font-weight: 700;
+}
+
+/* Dropdown compacto de Estúdio */
+.studio-dropdown {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.studio-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-support);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.studio-trigger:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.studio-trigger[data-active='true'] {
+  background: var(--primary, #2563eb);
+  border-color: var(--primary, #2563eb);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.studio-chevron {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.studio-clear {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 2px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.studio-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: 260px;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+}
+
+.studio-search-input {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  margin-bottom: 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg, #0b1220);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8125rem;
+  outline: none;
+}
+
+.studio-search-input:focus {
+  border-color: var(--focus);
+}
+
+/* Lista com scrollbar escura estilizada */
+.studio-options {
+  display: flex;
+  flex-direction: column;
+  max-height: 210px;
+  overflow-y: auto;
+  padding-right: 4px;
+  gap: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.studio-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.studio-options::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.studio-options::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 999px;
+}
+
+.studio-options::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-secondary);
+}
+
+.studio-option {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-support);
+  font: inherit;
+  font-size: 0.8125rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.studio-option:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.studio-option[aria-selected='true'] {
+  background: rgba(37, 99, 235, 0.2);
+  color: var(--link-dark, #60a5fa);
+  font-weight: 600;
+}
+
+.studio-empty {
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+/* Barra de filtros ativos */
+.active-filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.active-filters-summary strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.clear-filters-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--link-dark);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clear-filters-btn:hover {
+  background: var(--surface-hover);
 }
 
 .results-hint {
@@ -225,4 +469,32 @@
 }
 .movie-card:hover {
   border-color: var(--focus);
+}
+
+@media (max-width: 720px) {
+  .search-bar {
+    flex-direction: column;
+  }
+
+  .search-bar .search-mode-toggle {
+    width: 100%;
+  }
+
+  .search-bar .search-mode-btn {
+    flex: 1;
+  }
+
+  .search-submit {
+    height: 48px;
+    justify-content: center;
+  }
+
+  .filters-divider {
+    display: none;
+  }
+
+  .studio-menu {
+    left: 0;
+    right: auto;
+  }
 }
