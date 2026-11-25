@@ -22,26 +22,23 @@ export function MovieRating({ movieId }: { movieId: number }) {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [toast, setToast] = useState<Toast>(null);
 
+  // Falha no GET NÃO é "sem avaliação": mostra erro com retry em vez do formulário.
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
+    setLoadError(false);
     getMyRating(movieId)
       .then((rating) => !cancelled && setSaved(rating))
-      .catch(
-        () =>
-          !cancelled &&
-          setToast({
-            ok: false,
-            title: 'Não foi possível carregar',
-            text: 'Verifique sua conexão e tente novamente.',
-          }),
-      )
+      .catch(() => !cancelled && setLoadError(true))
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [movieId]);
+  }, [movieId, attempt]);
 
   // A mensagem some sozinha depois de 4 segundos.
   useEffect(() => {
@@ -110,7 +107,7 @@ export function MovieRating({ movieId }: { movieId: number }) {
           <StarRating
             value={choice}
             onChange={onChange}
-            disabled={loading || sending}
+            disabled={loading || sending || loadError}
             readOnly={!!saved}
           />
           <span className="rating-label">
@@ -124,14 +121,29 @@ export function MovieRating({ movieId }: { movieId: number }) {
           </span>
         </div>
 
+        {loadError && (
+          <>
+            <p className="rating-error" role="alert">
+              Não foi possível carregar sua avaliação.
+            </p>
+            <button
+              type="button"
+              className="rating-btn"
+              onClick={() => setAttempt((n) => n + 1)}
+            >
+              Tentar novamente
+            </button>
+          </>
+        )}
+
         {failed && (
-          <p className="rating-error" role="alert">
+          <p className="rating-error">
             Não foi possível salvar sua avaliação. Verifique sua conexão e tente
             novamente.
           </p>
         )}
 
-        {!saved && (
+        {!saved && !loadError && (
           <>
             <button
               type="button"

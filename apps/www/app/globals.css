@@ -1,4 +1,4 @@
-/*  BOTÕES GERAIS E MODAL */
+/* ---------- BOTÕES GERAIS E MODAL ---------- */
 .btn {
   font: inherit;
   font-weight: 600;
@@ -16,7 +16,7 @@
   border-color: var(--text-secondary);
 }
 
-/* ÁREA LOGADA */
+/* ---------- ÁREA LOGADA--------- */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -59,27 +59,32 @@
   gap: 12px;
 }
 .modal-actions .btn-primary {
-  width: auto; /* sem issoo btn-primary (100%) estica no flex */
+  width: auto; /* sem isto o btn-primary (100%) estica no flex */
 }
-/* Componente de estrelas(SCRUM-71)*/
+/* Componente de estrelas (SCRUM-71/72) */
 .stars {
   --star-on: #f59e0b;
-  --star-off: #334155;
+  --star-off: #475569;
   display: inline-flex;
   gap: 4px;
 }
 .star {
   position: relative;
-  color: var(--star-off);
-  font-size: 32px;
+  font-size: 34px;
   line-height: 1;
   cursor: pointer;
-  transition:
-    color 0.15s,
-    transform 0.15s;
+  transition: transform 0.15s;
 }
-.star.on {
-  color: var(--star-on);
+.star svg {
+  display: block;
+  fill: none;
+  stroke: var(--star-off);
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+}
+.star.on svg {
+  fill: var(--star-on);
+  stroke: var(--star-on);
 }
 .star:hover {
   transform: scale(1.1);
@@ -103,6 +108,10 @@
   cursor: not-allowed;
   transform: none;
 }
+.stars.readonly .star:has(input:disabled) {
+  opacity: 1;
+  cursor: default;
+}
 .sr-only {
   position: absolute;
   width: 1px;
@@ -110,86 +119,6 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
-}
-
-/*  Avaliação do filme (SCRUM-72) */
-.rating-box {
-  display: grid;
-  gap: 12px;
-  justify-items: center;
-  width: 100%;
-  max-width: 400px;
-  padding: 24px;
-  border: 1px solid #1e293b;
-  border-radius: 12px;
-  background: #111827;
-  text-align: center;
-}
-.rating-box h2 {
-  font-size: 18px;
-  font-weight: 600;
-}
-.rating-saved {
-  color: #94a3b8;
-  font-size: 14px;
-}
-.rating-btn {
-  width: 100%;
-  padding: 12px;
-  border: 0;
-  border-radius: 8px;
-  color: #fff;
-  background: #2563eb;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-.rating-btn:hover:not(:disabled) {
-  background: #1d4ed8;
-}
-.rating-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.rating-alert {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid;
-  border-radius: 8px;
-  font-size: 14px;
-}
-.rating-alert.ok {
-  border-color: #22c55e;
-  color: #22c55e;
-  background: #22c55e20;
-}
-.rating-alert.error {
-  border-color: #f87171;
-  color: #f87171;
-  background: #f8717120;
-}
-/* Estrelas: ajustes do design (SCRUM-71/72)*/
-.stars {
-  --star-on: #f59e0b;
-  --star-off: #475569;
-}
-.star {
-  font-size: 34px;
-}
-.star svg {
-  display: block;
-  fill: none;
-  stroke: var(--star-off);
-  stroke-width: 1.7;
-  stroke-linejoin: round;
-}
-.star.on svg {
-  fill: var(--star-on);
-  stroke: var(--star-on);
-}
-.stars.readonly .star:has(input:disabled) {
-  opacity: 1;
-  cursor: default;
 }
 
 /* Avaliação do filme (SCRUM-72) */
@@ -271,6 +200,11 @@
 }
 .rating-btn:hover:not(:disabled) {
   background: #1d4ed8;
+}
+.rating-btn:focus-visible,
+.rating-toast button:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
 }
 .rating-btn:disabled {
   color: #ffffffb3;
