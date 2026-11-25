@@ -17,6 +17,8 @@ export const WithValue: Story = { args: { value: 3 } };
 
 export const Disabled: Story = { args: { value: 4, disabled: true } };
 
+export const ReadOnly: Story = { args: { value: 4, readOnly: true } };
+
 // Estado controlado, como será usado na aplicação.
 export const Interactive: Story = {
   render: function Render(args) {
