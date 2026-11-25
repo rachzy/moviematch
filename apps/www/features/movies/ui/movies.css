@@ -214,3 +214,15 @@
 .empty-tips li::marker {
   color: var(--link-dark);
 }
+.movie-link {
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.movie-link:hover {
+  text-decoration: none;
+}
+.movie-card:hover {
+  border-color: var(--focus);
+}
