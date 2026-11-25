@@ -1,4 +1,6 @@
 :root {
+  /* O site é sempre escuro: barra de rolagem e campos nativos também. */
+  color-scheme: dark;
   /* Cores do Design System */
   --bg: #0b1220;
   --surface: #111827;
