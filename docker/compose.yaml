@@ -22,22 +22,11 @@ services:
 
   api:
     build: { context: .., dockerfile: docker/Dockerfile, target: dev }
-    command:
-      - sh
-      - -c
-      - |
-        [ -d /app/node_modules/@nestjs/core ] || npm install --no-audit --no-fund &&
-        npm exec -w api -- prisma generate --schema=prisma/schema.prisma &&
-        npm exec -w api -- prisma db push --schema=prisma/schema.prisma &&
-        npm exec -w api -- tsc -p tsconfig.json --ignoreDeprecations 6.0 &&
-        (npm exec -w api -- tsc -p tsconfig.json --ignoreDeprecations 6.0 --watch &) &&
-        node --watch apps/api/dist/main.js
-    env_file:
-      - .env
+    command: npm run dev -w api
     environment:
-      NODE_ENV: development
       DATABASE_URL: postgresql://moviematch:moviematch@db:5432/moviematch
       JWT_SECRET: dev-only-secret-troque-em-producao
+      TMDB_READ_ACCESS_TOKEN: ${TMDB_READ_ACCESS_TOKEN:-}
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
     ports: ['3001:3001']
@@ -49,8 +38,6 @@ services:
   www:
     build: { context: .., dockerfile: docker/Dockerfile, target: dev }
     command: npm run dev -w www
-    environment:
-      NODE_ENV: development
     ports: ['3000:3000']
     volumes: ['../apps:/app/apps']
 

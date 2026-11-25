@@ -1,6 +1,5 @@
 # Contexto de build é a raiz do repo. Alvos: dev (compose de desenvolvimento), api e www (produção)
 FROM node:24-alpine AS dev
-ENV NODE_ENV=development
 RUN apk add --no-cache openssl
 WORKDIR /app
 RUN chown node:node /app
@@ -8,7 +7,7 @@ USER node
 COPY --chown=node:node package*.json ./
 COPY --chown=node:node apps/api/package.json apps/api/
 COPY --chown=node:node apps/www/package.json apps/www/
-RUN npm ci --include=dev
+RUN npm ci
 COPY --chown=node:node . .
 RUN npm exec -w api -- prisma generate
 

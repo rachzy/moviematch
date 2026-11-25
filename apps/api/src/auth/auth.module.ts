@@ -11,7 +11,6 @@ import { JwtAuthGuard } from './jwt-auth.guard';
     UsersModule,
     MailModule,
     JwtModule.registerAsync({
-      global: true,
       useFactory: () => {
         // Sem segredo a API não sobe: nada de fallback hardcoded.
         const secret = process.env.JWT_SECRET;

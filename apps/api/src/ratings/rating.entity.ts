@@ -1,0 +1,12 @@
+// Entity de domínio: o resto da aplicação nunca lida com o tipo do Prisma.
+export class Rating {
+  constructor(
+    readonly userId: string,
+    readonly movieId: number,
+    readonly value: number,
+  ) {}
+
+  toPublic() {
+    return { movieId: this.movieId, value: this.value };
+  }
+}
