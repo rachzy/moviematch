@@ -61,3 +61,16 @@
 .modal-actions .btn-primary {
   width: auto; /* sem isto o btn-primary (100%) estica no flex */
 }
+
+.topnav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.topnav a {
+  color: var(--text);
+  font-weight: 600;
+}
+.brand-accent {
+  color: var(--link-dark);
+}
