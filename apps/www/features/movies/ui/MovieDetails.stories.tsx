@@ -12,7 +12,15 @@ const movie: Details = {
   overview:
     'Um hacker descobre que a realidade em que vive é uma simulação controlada por máquinas.',
   genres: ['Ação', 'Ficção científica'],
-  cast: ['Keanu Reeves', 'Laurence Fishburne', 'Carrie-Anne Moss'],
+  cast: [
+    'Keanu Reeves',
+    'Laurence Fishburne',
+    'Carrie-Anne Moss',
+    'Hugo Weaving',
+  ],
+  rating: 4.1,
+  voteCount: 26874,
+  runtime: 136,
 };
 
 // Troca o adapter do axios: nenhuma chamada real à API.
@@ -50,9 +58,28 @@ export const Carregado: Story = {
   },
 };
 
-export const SemPosterESemSinopse: Story = {
+export const ComAvaliacaoAbaixo: Story = {
+  decorators: [mock(200, movie)],
+  args: {
+    children: (
+      <section className="rating-card">
+        <h2>Sua avaliação</h2>
+        <p className="rating-sub">Aqui entra o cartão de avaliação.</p>
+      </section>
+    ),
+  },
+};
+
+export const SemPosterSemNotaESemSinopse: Story = {
   decorators: [
-    mock(200, { ...movie, posterUrl: null, overview: '', cast: [] }),
+    mock(200, {
+      ...movie,
+      posterUrl: null,
+      overview: '',
+      cast: [],
+      rating: null,
+      runtime: null,
+    }),
   ],
 };
 

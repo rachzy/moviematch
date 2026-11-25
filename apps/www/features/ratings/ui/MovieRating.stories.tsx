@@ -77,10 +77,7 @@ export const SaveWithComment: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await userEvent.click(await c.findByLabelText('4 estrelas'));
-    await userEvent.type(
-      c.getByLabelText('Comentário (opcional)'),
-      'Roteiro ótimo',
-    );
+    await userEvent.type(c.getByLabelText(/Seu comentário/), 'Roteiro ótimo');
     await userEvent.click(c.getByRole('button', { name: 'Enviar avaliação' }));
     await expect(
       await c.findByRole('button', { name: 'Editar' }),

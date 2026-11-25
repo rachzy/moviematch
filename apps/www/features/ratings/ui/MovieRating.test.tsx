@@ -37,7 +37,7 @@ describe('MovieRating', () => {
 
     await userEvent.click(await screen.findByLabelText('4 estrelas'));
     await userEvent.type(
-      screen.getByLabelText('Comentário (opcional)'),
+      screen.getByLabelText(/Seu comentário/),
       'Roteiro ótimo',
     );
     await userEvent.click(

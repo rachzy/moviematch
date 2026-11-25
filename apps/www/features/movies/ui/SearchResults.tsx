@@ -1,36 +1,64 @@
-import type { Movie } from '../types';
+import type { Movie, SearchBy } from '../types';
 import { MovieCard } from './MovieCard';
-import { FilmIcon } from './icons';
+import { CloseIcon, FilmSearchIcon } from './icons';
+
+// O que está sendo mostrado: os populares (tela inicial) ou uma busca.
+export type ResultsView =
+  | { kind: 'popular' }
+  | { kind: 'search'; query: string; by: SearchBy; genre: string | null };
 
 type Props = {
-  status: 'idle' | 'loading' | 'done' | 'error';
+  status: 'loading' | 'done' | 'error';
   movies: Movie[];
-  query: string;
+  view: ResultsView;
   onClear: () => void;
+  onPopular: () => void;
+  onRate?: (movie: Movie) => void;
 };
 
-export function SearchResults({ status, movies, query, onClear }: Props) {
-  if (status === 'idle') {
-    return (
-      <p className="results-hint">
-        Busque por título ou ator, ou escolha um gênero para começar.
-      </p>
-    );
-  }
+function heading(view: ResultsView, count: number) {
+  if (view.kind === 'popular') return { title: 'Populares agora', sub: null };
+  const n = `${count} ${count === 1 ? 'filme' : 'filmes'}`;
+  const where = view.by === 'actor' ? 'no elenco' : 'no título';
+  const genre = view.genre ? ` · ${view.genre}` : '';
+  if (!view.query) return { title: `${n} de ${view.genre}`, sub: null };
+  return {
+    title: `${n} com “${view.query}” ${where}${genre}`,
+    sub:
+      view.by === 'title'
+        ? 'A busca ignora acentos e maiúsculas. Clique em um filme para ver os detalhes.'
+        : 'Clique em um filme para ver os detalhes.',
+  };
+}
 
+export function SearchResults({
+  status,
+  movies,
+  view,
+  onClear,
+  onPopular,
+  onRate,
+}: Props) {
   if (status === 'loading') {
     return (
-      <ul className="movie-grid" aria-busy="true" aria-label="Carregando">
-        {Array.from({ length: 6 }, (_, i) => (
-          <li key={i} className="movie-card skeleton">
-            <div className="movie-poster" />
-            <div className="movie-info">
-              <span />
-              <span />
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div aria-busy="true" aria-label="Carregando">
+        <div className="skeleton results-skeleton">
+          <span />
+          <span />
+        </div>
+        <ul className="movie-grid">
+          {Array.from({ length: 6 }, (_, i) => (
+            <li key={i} className="movie-card skeleton">
+              <div className="movie-poster" />
+              <div className="movie-info">
+                <span />
+                <span />
+              </div>
+              <span className="skeleton-btn" />
+            </li>
+          ))}
+        </ul>
+      </div>
     );
   }
 
@@ -44,10 +72,11 @@ export function SearchResults({ status, movies, query, onClear }: Props) {
   }
 
   if (movies.length === 0) {
+    const query = view.kind === 'search' ? view.query : '';
     return (
       <div className="empty-state">
         <div className="empty-icon">
-          <FilmIcon size={40} />
+          <FilmSearchIcon size={44} />
         </div>
         <h2>Nenhum filme encontrado</h2>
         {query && (
@@ -55,27 +84,39 @@ export function SearchResults({ status, movies, query, onClear }: Props) {
             Não achamos resultados para <strong>“{query}”</strong>.
           </p>
         )}
-        <ul className="empty-tips">
-          <li>Confira se o nome está escrito certo</li>
-          <li>Use só parte do título, como “farol”</li>
-          <li>Busque por um ator ou escolha um gênero</li>
-        </ul>
-        <button type="button" className="btn btn-secondary" onClick={onClear}>
-          Limpar busca
-        </button>
+        <div className="empty-tips">
+          <strong>Algumas dicas</strong>
+          <ul>
+            <li>Confira se o nome está escrito certo</li>
+            <li>Use só parte do título, como “farol”</li>
+            <li>Busque por um ator ou escolha um gênero</li>
+          </ul>
+        </div>
+        <div className="empty-actions">
+          <button type="button" className="btn btn-secondary" onClick={onClear}>
+            <CloseIcon size={16} /> Limpar busca
+          </button>
+          <button type="button" className="btn btn-primary" onClick={onPopular}>
+            Ver filmes populares
+          </button>
+        </div>
       </div>
     );
   }
 
+  const { title, sub } = heading(view, movies.length);
   return (
     <section>
-      <h2 className="results-title">
-        {movies.length} {movies.length === 1 ? 'filme' : 'filmes'}
-        {query && <> com “{query}”</>}
-      </h2>
+      <h2 className="results-title">{title}</h2>
+      {sub && <p className="results-sub">{sub}</p>}
       <ul className="movie-grid">
         {movies.map((m) => (
-          <MovieCard key={m.id} movie={m} />
+          <MovieCard
+            key={m.id}
+            movie={m}
+            onRate={onRate}
+            plain={view.kind === 'popular'}
+          />
         ))}
       </ul>
     </section>

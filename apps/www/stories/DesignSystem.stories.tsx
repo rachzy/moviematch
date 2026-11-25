@@ -1,7 +1,7 @@
+import { LogoMark } from '@/shared/ui/Logo';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import {
   CheckCircleIcon,
-  LogoIcon,
   MailIcon,
   WarningIcon,
 } from '../features/auth/ui/icons';
@@ -97,7 +97,7 @@ export const Inputs: Story = {
 export const Icons: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
-      <LogoIcon size={48} />
+      <LogoMark size={48} />
       <MailIcon />
       <CheckCircleIcon />
       <WarningIcon />

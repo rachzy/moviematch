@@ -48,6 +48,9 @@
   font-weight: 700;
   color: #fff;
 }
+.auth-brand .logo {
+  font-size: 24px;
+}
 .auth-brand b {
   color: #93c5fd;
   font-weight: 700;

@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { getMovie } from '../api';
 import type { MovieDetails as Details } from '../types';
-import { FilmIcon } from './icons';
+import { ChevronLeftIcon, FilmIcon, StarIcon } from './icons';
 import './movies.css';
 
 type State =
@@ -12,7 +13,24 @@ type State =
   | { status: 'error'; notFound: boolean }
   | { status: 'done'; movie: Details };
 
-export function MovieDetails({ movieId }: { movieId: number }) {
+const duration = (min: number) =>
+  `${Math.floor(min / 60)}h ${String(min % 60).padStart(2, '0')}min`;
+
+// "A, B e C"
+const list = (names: string[]) =>
+  names.length < 2
+    ? names.join('')
+    : `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}`;
+
+// `children` aparece abaixo da sinopse (a página põe a avaliação ali).
+export function MovieDetails({
+  movieId,
+  children,
+}: {
+  movieId: number;
+  children?: ReactNode;
+}) {
+  const router = useRouter();
   const [state, setState] = useState<State>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
 
@@ -31,72 +49,93 @@ export function MovieDetails({ movieId }: { movieId: number }) {
     };
   }, [movieId, attempt]);
 
-  if (state.status === 'loading') {
-    return (
-      <article className="movie-details skeleton" aria-busy="true">
-        <div className="movie-poster" />
-        <div className="movie-details-body">
-          <span className="skeleton-line" />
-          <span className="skeleton-line short" />
-        </div>
-      </article>
-    );
-  }
+  // Volta para a busca de onde a pessoa veio; sem histórico, abre a busca.
+  const back = (
+    <button
+      type="button"
+      className="back-link"
+      onClick={() =>
+        window.history.length > 1 ? router.back() : router.push('/search')
+      }
+    >
+      <ChevronLeftIcon size={16} /> Voltar aos resultados
+    </button>
+  );
 
   if (state.status === 'error') {
     return (
-      <div className="empty-state" role="alert">
-        <h2>
-          {state.notFound
-            ? 'Filme não encontrado'
-            : 'Não foi possível carregar o filme'}
-        </h2>
-        {state.notFound ? (
-          <Link href="/search" className="btn btn-secondary">
-            Voltar para a busca
-          </Link>
-        ) : (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setAttempt((n) => n + 1)}
-          >
-            Tentar novamente
-          </button>
-        )}
+      <div className="movie-page">
+        {back}
+        <div className="empty-state" role="alert">
+          <h2>
+            {state.notFound
+              ? 'Filme não encontrado'
+              : 'Não foi possível carregar o filme'}
+          </h2>
+          {state.notFound ? (
+            <Link href="/search" className="btn btn-secondary">
+              Ir para a busca
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setAttempt((n) => n + 1)}
+            >
+              Tentar novamente
+            </button>
+          )}
+        </div>
       </div>
     );
   }
 
-  const { movie } = state;
+  const movie = state.status === 'done' ? state.movie : null;
+  const meta = movie
+    ? [movie.year, movie.genres[0], movie.runtime && duration(movie.runtime)]
+        .filter(Boolean)
+        .join(' · ')
+    : '';
+
   return (
-    <article className="movie-details">
-      <div className="movie-poster">
-        {movie.posterUrl ? (
-          <img src={movie.posterUrl} alt={`Pôster de ${movie.title}`} />
-        ) : (
-          <FilmIcon size={48} />
-        )}
-      </div>
-      <div className="movie-details-body">
-        <h1>
-          {movie.title}
-          {movie.year && <span> ({movie.year})</span>}
-        </h1>
-        {movie.genres.length > 0 && (
-          <ul className="movie-tags" aria-label="Gêneros">
-            {movie.genres.map((g) => (
-              <li key={g}>{g}</li>
-            ))}
-          </ul>
-        )}
-        <p>{movie.overview || 'Sinopse não disponível.'}</p>
-        {movie.cast.length > 0 && (
-          <p className="movie-cast">
-            <strong>Elenco:</strong> {movie.cast.join(', ')}
-          </p>
-        )}
-      </div>
-    </article>
+    <div className="movie-page">
+      {back}
+      <article className="movie-details" aria-busy={!movie}>
+        <div className={movie ? 'movie-poster' : 'movie-poster skeleton'}>
+          {movie?.posterUrl ? (
+            <img src={movie.posterUrl} alt={`Pôster de ${movie.title}`} />
+          ) : (
+            movie && <FilmIcon size={48} />
+          )}
+        </div>
+        <div className="movie-details-body">
+          {movie ? (
+            <>
+              <h1>{movie.title}</h1>
+              {meta && <p className="movie-meta">{meta}</p>}
+              {movie.rating !== null && (
+                <p className="movie-score">
+                  <StarIcon size={16} />
+                  <b>{movie.rating.toFixed(1).replace('.', ',')}</b> média de{' '}
+                  {movie.voteCount.toLocaleString('pt-BR')} avaliações
+                </p>
+              )}
+              {movie.cast.length > 0 && (
+                <p className="movie-cast">
+                  <span>Elenco:</span> {list(movie.cast.slice(0, 3))}
+                </p>
+              )}
+              <p>{movie.overview || 'Sinopse não disponível.'}</p>
+            </>
+          ) : (
+            <div className="skeleton">
+              <span className="skeleton-line" />
+              <span className="skeleton-line short" />
+            </div>
+          )}
+          {children}
+        </div>
+      </article>
+    </div>
   );
 }

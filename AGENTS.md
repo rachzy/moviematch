@@ -27,7 +27,7 @@ Exemplo de referência: `auth` + `users`. Fluxo: controller → service → repo
 
 - `<módulo>/` — controller (HTTP), service (regras), `*.schemas.ts` (zod; validação do body via `common/zod-validation.pipe.ts`).
 - `users/` — `user.entity.ts` (entity de domínio) e `user.repository.ts` (único ponto que usa o `PrismaService`; devolve entities, nunca o tipo do Prisma).
-- `movies/` — busca de filmes via TMDB (`GET /movies`, `GET /movies/:id`, protegidas por `JwtAuthGuard`). Sem Prisma: `tmdb.client.ts` é o único ponto que fala com o TMDB; o `id` do filme é o `tmdbId`. Exige `TMDB_READ_ACCESS_TOKEN`.
+- `movies/` — busca de filmes via TMDB (`GET /movies`, `GET /movies/:id`, protegidas por `JwtAuthGuard`). `GET /movies` sem `q` nem `genre` devolve os populares; `by=title|actor` escolhe onde procurar o texto. Sem Prisma: `tmdb.client.ts` é o único ponto que fala com o TMDB; o `id` do filme é o `tmdbId`. Exige `TMDB_READ_ACCESS_TOKEN`.
 - `ratings/` — avaliação do usuário por filme (`GET/PUT/DELETE /movies/:id/rating`, nota 1–5 + comentário opcional; uma por usuário e filme). `affinity/` — `GET /affinity`, match calculado na hora a partir das avaliações (editar/excluir já muda o resultado).
 - `prisma/` — `PrismaModule` global.
 
@@ -35,7 +35,7 @@ Exemplo de referência: `auth` + `users`. Fluxo: controller → service → repo
 
 - `app/` — só rotas/layout do Next; compõe features, sem lógica de negócio.
 - `features/<nome>/` — um diretório por funcionalidade, com suas camadas: `types.ts` (modelos), `api.ts` (acesso à API, via axios) e `ui/` (componentes/hooks). Referência: `features/auth`.
-- `shared/` — código sem dono de feature (ex.: `shared/lib/http.ts`, a instância única do axios).
+- `shared/` — código sem dono de feature (ex.: `shared/lib/http.ts`, a instância única do axios; `shared/ui/Logo.tsx` e `shared/ui/TopNav.tsx`).
 - Dependências só descem: `app` → `features/*/ui` → `features/*/api` → `shared`. Features não importam umas das outras; se algo for comum, vai para `shared`.
 - Imports usam o alias `@/` (raiz de `apps/www`). Para novas requisições, sempre use `shared/lib/http.ts`.
 - A API libera CORS (`app.enableCors()`) porque o browser chama `NEXT_PUBLIC_API_URL` (padrão `http://localhost:3001`) direto.

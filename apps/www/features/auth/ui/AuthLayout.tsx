@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { LogoIcon } from './icons';
+import { Logo } from '@/shared/ui/Logo';
 import './auth-layout.css';
 
 // Painel azul da marca + área do cartão. Usado por login, cadastro e verificação.
@@ -8,10 +8,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
     <div className="auth-page">
       <aside className="auth-hero">
         <div className="auth-brand">
-          <LogoIcon />
-          <span>
-            Movie<b>Match</b>
-          </span>
+          <Logo size={36} />
         </div>
 
         <div className="auth-hero-text">

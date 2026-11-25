@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { deleteRating, getMyRating, saveRating } from '../api';
 import { RATING_LABELS, type Rating } from '../types';
+import { CommentField } from './CommentField';
 import { DeleteRatingModal } from './DeleteRatingModal';
 import { EditRatingModal } from './EditRatingModal';
+import { InfoIcon, PencilIcon, TrashIcon } from './icons';
 import { StarRating } from './StarRating';
+import { Toast, type ToastData } from './Toast';
 import './ratings.css';
 
-type Toast = { ok: boolean; title: string; text: string } | null;
 type Modal = 'edit' | 'delete' | null;
 
 function formatDate(iso: string) {
@@ -20,6 +22,8 @@ function formatDate(iso: string) {
 
 export function MovieRating({ movieId }: { movieId: number }) {
   const [saved, setSaved] = useState<Rating | null>(null);
+  // true quando a avaliação já existia ao abrir a página (aviso "Você já avaliou").
+  const [ratedBefore, setRatedBefore] = useState(false);
   const [draft, setDraft] = useState(0);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(true);
@@ -27,10 +31,11 @@ export function MovieRating({ movieId }: { movieId: number }) {
   const [failed, setFailed] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const [toast, setToast] = useState<Toast>(null);
+  const [toast, setToast] = useState<ToastData | null>(null);
   const [modal, setModal] = useState<Modal>(null);
   const [modalBusy, setModalBusy] = useState(false);
   const [modalError, setModalError] = useState(false);
+  const closeToast = useCallback(() => setToast(null), []);
 
   // Falha no GET NÃO é "sem avaliação": mostra erro com retry em vez do formulário.
   useEffect(() => {
@@ -38,20 +43,17 @@ export function MovieRating({ movieId }: { movieId: number }) {
     setLoading(true);
     setLoadError(false);
     getMyRating(movieId)
-      .then((rating) => !cancelled && setSaved(rating))
+      .then((rating) => {
+        if (cancelled) return;
+        setSaved(rating);
+        setRatedBefore(!!rating);
+      })
       .catch(() => !cancelled && setLoadError(true))
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
     };
   }, [movieId, attempt]);
-
-  // A mensagem some sozinha depois de 4 segundos.
-  useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(null), 4000);
-    return () => clearTimeout(timer);
-  }, [toast]);
 
   function onChange(value: number) {
     setDraft(value);
@@ -67,7 +69,7 @@ export function MovieRating({ movieId }: { movieId: number }) {
       setToast({
         ok: true,
         title: 'Avaliação salva!',
-        text: 'Sua nota já conta para seus matches.',
+        text: 'Sua nota e seu comentário já contam para seus matches.',
       });
     } catch {
       setFailed(true);
@@ -110,6 +112,7 @@ export function MovieRating({ movieId }: { movieId: number }) {
     try {
       await deleteRating(movieId);
       setSaved(null);
+      setRatedBefore(false);
       setDraft(0);
       setComment('');
       setModal(null);
@@ -132,10 +135,10 @@ export function MovieRating({ movieId }: { movieId: number }) {
     : saved
       ? 'Sua nota já entra no cálculo de match com outras pessoas.'
       : failed
-        ? 'Sua nota não foi perdida. Tente enviar de novo.'
+        ? 'Sua nota e seu comentário não foram perdidos. Tente enviar de novo.'
         : draft
-          ? 'Confira a nota antes de enviar. Depois você pode editar ou excluir.'
-          : 'Escolha de 1 a 5 estrelas. Depois você pode editar ou excluir.';
+          ? 'Confira a nota e o comentário antes de enviar. Cada filme só pode ser avaliado uma vez.'
+          : 'Escolha de 1 a 5 estrelas. Cada filme só pode ser avaliado uma vez.';
 
   return (
     <>
@@ -173,7 +176,7 @@ export function MovieRating({ movieId }: { movieId: number }) {
         </div>
 
         {loadError && (
-          <>
+          <div className="rating-foot">
             <p className="rating-error" role="alert">
               Não foi possível carregar sua avaliação.
             </p>
@@ -184,75 +187,85 @@ export function MovieRating({ movieId }: { movieId: number }) {
             >
               Tentar novamente
             </button>
-          </>
-        )}
-
-        {failed && (
-          <p className="rating-error">
-            Não foi possível salvar sua avaliação. Verifique sua conexão e tente
-            novamente.
-          </p>
+          </div>
         )}
 
         {saved && (
           <>
             {saved.comment && <p className="rating-quote">{saved.comment}</p>}
-            <div className="rating-actions">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => openModal('edit')}
-              >
-                Editar
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => openModal('delete')}
-              >
-                Excluir
-              </button>
+            <div className="rating-foot">
+              <span />
+              <div className="rating-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => openModal('edit')}
+                >
+                  <PencilIcon /> Editar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger-outline"
+                  onClick={() => openModal('delete')}
+                >
+                  <TrashIcon /> Excluir
+                </button>
+              </div>
             </div>
           </>
         )}
 
         {!saved && !loadError && (
           <>
-            <label className="rating-comment">
-              Comentário (opcional)
-              <textarea
-                value={comment}
-                maxLength={500}
-                rows={3}
-                placeholder="O que você achou do filme?"
-                disabled={loading || sending}
-                onChange={(e) => setComment(e.target.value)}
-              />
-            </label>
-            <button
-              type="button"
-              className="rating-btn"
-              onClick={onSubmit}
-              disabled={loading || sending || !draft}
-            >
-              {sending ? (
-                <>
-                  <span className="rating-spinner" /> Enviando…
-                </>
-              ) : failed ? (
-                'Tentar novamente'
+            <CommentField
+              value={comment}
+              onChange={setComment}
+              disabled={loading || sending}
+            />
+            <div className="rating-foot">
+              {failed ? (
+                <p className="rating-error" role="alert">
+                  Não foi possível salvar sua avaliação. Verifique sua conexão e
+                  tente novamente.
+                </p>
+              ) : sending || loading ? (
+                <span />
+              ) : draft ? (
+                <p className="rating-hint">
+                  Você pode enviar só a nota, sem comentário.
+                </p>
               ) : (
-                'Enviar avaliação'
+                <p className="rating-hint">
+                  <InfoIcon /> Escolha uma nota para liberar o botão.
+                </p>
               )}
-            </button>
-            {!draft && !loading && (
-              <p className="rating-hint">
-                Escolha uma nota para liberar o botão.
-              </p>
-            )}
+              <button
+                type="button"
+                className="rating-btn"
+                onClick={onSubmit}
+                disabled={loading || sending || !draft}
+              >
+                {sending ? (
+                  <>
+                    <span className="rating-spinner" /> Enviando…
+                  </>
+                ) : failed ? (
+                  'Tentar novamente'
+                ) : (
+                  'Enviar avaliação'
+                )}
+              </button>
+            </div>
           </>
         )}
       </section>
+
+      {saved && ratedBefore && (
+        <p className="rating-notice">
+          <InfoIcon /> Você já avaliou este filme. Para mudar a nota ou o
+          comentário, use Editar.
+        </p>
+      )}
 
       {saved && (
         <EditRatingModal
@@ -272,24 +285,7 @@ export function MovieRating({ movieId }: { movieId: number }) {
         onConfirm={onDelete}
       />
 
-      {toast && (
-        <div
-          className={toast.ok ? 'rating-toast ok' : 'rating-toast error'}
-          role={toast.ok ? 'status' : 'alert'}
-        >
-          <div>
-            <strong>{toast.title}</strong>
-            <p>{toast.text}</p>
-          </div>
-          <button
-            type="button"
-            aria-label="Fechar mensagem"
-            onClick={() => setToast(null)}
-          >
-            ✕
-          </button>
-        </div>
-      )}
+      <Toast toast={toast} onClose={closeToast} />
     </>
   );
 }

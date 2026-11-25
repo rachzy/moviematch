@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { RATING_LABELS, type Rating } from '../types';
+import { CommentField } from './CommentField';
 import { StarRating } from './StarRating';
 import { useDialog } from './useDialog';
 import './ratings.css';
@@ -70,16 +71,7 @@ export function EditRatingModal({
             <b>{value}</b> · {RATING_LABELS[value]}
           </span>
         </div>
-        <label className="rating-comment">
-          Comentário (opcional)
-          <textarea
-            value={comment}
-            maxLength={500}
-            rows={3}
-            disabled={saving}
-            onChange={(e) => setComment(e.target.value)}
-          />
-        </label>
+        <CommentField value={comment} onChange={setComment} disabled={saving} />
         {error && (
           <p className="rating-error" role="alert">
             Não foi possível salvar a alteração. Tente novamente.

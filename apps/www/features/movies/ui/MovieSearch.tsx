@@ -1,80 +1,104 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { searchMovies } from '../api';
 import type { Movie, SearchBy } from '../types';
 import { GenreFilter } from './GenreFilter';
 import { SearchBar } from './SearchBar';
-import { SearchByFilter } from './SearchByFilter';
-import { SearchResults } from './SearchResults';
+import { SearchModeToggle } from './SearchModeToggle';
+import { SearchResults, type ResultsView } from './SearchResults';
 import './movies.css';
 
-type Status = 'idle' | 'loading' | 'done' | 'error';
+type Status = 'loading' | 'done' | 'error';
 
-export function MovieSearch() {
+// `onRate`: quem compõe a tela abre a janela de avaliação (app/(private)/search).
+export function MovieSearch({ onRate }: { onRate?: (movie: Movie) => void }) {
   const [text, setText] = useState('');
+  const [by, setBy] = useState<SearchBy>('title');
   const [genre, setGenre] = useState<string | null>(null);
-  const [by, setBy] = useState<SearchBy | null>(null);
-  const [status, setStatus] = useState<Status>('idle');
+  const [status, setStatus] = useState<Status>('loading');
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [searched, setSearched] = useState('');
+  const [view, setView] = useState<ResultsView>({ kind: 'popular' });
 
-  async function run(q: string, g: string | null, b = by) {
+  // Sem texto nem gênero, a API devolve os filmes populares.
+  const run = useCallback(async (q: string, b: SearchBy, g: string | null) => {
     const term = q.trim();
-    setSearched(term);
-    if (!term && !g) {
-      setStatus('idle');
-      return;
-    }
+    setView(
+      term || g
+        ? { kind: 'search', query: term, by: b, genre: g }
+        : { kind: 'popular' },
+    );
     setStatus('loading');
     try {
       setMovies(
         await searchMovies({
           q: term || undefined,
           genre: g ?? undefined,
-          by: term && b ? b : undefined,
+          by: term ? b : undefined,
         }),
       );
       setStatus('done');
     } catch {
       setStatus('error');
     }
+  }, []);
+
+  useEffect(() => {
+    void run('', 'title', null);
+  }, [run]);
+
+  function chooseBy(b: SearchBy) {
+    setBy(b);
+    if (text.trim()) void run(text, b, genre);
   }
 
   function chooseGenre(g: string | null) {
     setGenre(g);
-    void run(text, g);
-  }
-
-  function chooseBy(b: SearchBy | null) {
-    setBy(b);
-    if (text.trim()) void run(text, genre, b);
+    void run(text, by, g);
   }
 
   function clear() {
     setText('');
-    void run('', genre);
+    void run('', by, genre);
+  }
+
+  function popular() {
+    setText('');
+    setGenre(null);
+    void run('', by, null);
   }
 
   return (
     <div className="movie-search">
-      <h1>Buscar filmes</h1>
-      <p className="movie-search-sub">
-        Busque pelo nome do filme ou do ator e filtre por gênero.
-      </p>
-      <SearchBar
-        value={text}
-        loading={status === 'loading'}
-        onChange={setText}
-        onSubmit={() => run(text, genre)}
-      />
-      <SearchByFilter value={by} onChange={chooseBy} />
+      {view.kind === 'popular' && (
+        <header className="movie-search-head">
+          <h1>Buscar filmes</h1>
+          <p className="movie-search-sub">
+            Escolha se vai buscar pelo nome do filme ou do ator, filtre por
+            gênero e avalie o que assistiu.
+          </p>
+        </header>
+      )}
+      <div className="search-row">
+        <SearchModeToggle value={by} onChange={chooseBy} />
+        <SearchBar
+          value={text}
+          placeholder={
+            by === 'actor' ? 'Digite o nome do ator' : 'Digite o nome do filme'
+          }
+          loading={status === 'loading' && view.kind === 'search'}
+          onChange={setText}
+          onSubmit={() => run(text, by, genre)}
+        />
+      </div>
       <GenreFilter value={genre} onChange={chooseGenre} />
       <SearchResults
         status={status}
         movies={movies}
-        query={searched}
+        view={view}
         onClear={clear}
+        onPopular={popular}
+        onRate={onRate}
       />
     </div>
   );

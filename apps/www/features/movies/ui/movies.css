@@ -12,6 +12,54 @@
   color: var(--text-support);
 }
 
+/* Filme | Ator + campo + botão, numa linha só */
+.search-row {
+  display: flex;
+  gap: 12px;
+}
+.search-row .search-bar {
+  flex: 1;
+}
+.search-mode {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.search-mode button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text-support);
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+.search-mode button[aria-pressed='true'] {
+  color: #fff;
+  background: var(--primary);
+  font-weight: 700;
+}
+.field-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--link-dark);
+  border-radius: 50%;
+  animation: movie-spin 0.8s linear infinite;
+}
+@keyframes movie-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .search-bar {
   display: flex;
   gap: 16px;
@@ -117,11 +165,37 @@
   font-weight: 700;
   margin-bottom: 16px;
 }
+.results-sub {
+  margin: -12px 0 16px;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+.results-skeleton {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.results-skeleton span {
+  height: 16px;
+  width: 220px;
+  border-radius: 8px;
+  background: var(--surface-hover);
+}
+.results-skeleton span:last-child {
+  height: 10px;
+  width: 320px;
+}
+.skeleton-btn {
+  height: 30px;
+  margin: 0 12px 12px;
+  border-radius: 8px;
+  background: var(--surface-hover);
+}
 
 .movie-grid {
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 16px;
 }
 .movie-card {
@@ -133,6 +207,7 @@
   overflow: hidden;
 }
 .movie-poster {
+  position: relative;
   aspect-ratio: 2 / 3;
   display: grid;
   place-items: center;
@@ -203,13 +278,33 @@
   color: var(--text-support);
 }
 .empty-tips {
-  list-style: disc;
-  padding: 16px 24px 16px 40px;
+  padding: 12px 18px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
   text-align: left;
   color: var(--text-support);
+}
+.empty-tips strong {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+.empty-tips ul {
+  list-style: disc;
+  margin-top: 6px;
+  padding-left: 20px;
+  line-height: 1.8;
+}
+.empty-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+.empty-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
 }
 .empty-tips li::marker {
   color: var(--link-dark);
@@ -227,66 +322,150 @@
   border-color: var(--focus);
 }
 
-/* Atalho "Avaliar" no cartão (SCRUM-80) */
-.movie-rate {
-  padding: 8px 12px 12px;
-  color: var(--link-dark);
-  font-size: 0.8125rem;
-  font-weight: 600;
+/* Populares: só pôster e título, sem moldura nem botão (design A1) */
+.movie-card.plain {
+  border: 0;
+  background: none;
+}
+.movie-card.plain .movie-poster {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.movie-card.plain .movie-info {
+  padding: 10px 0 0;
 }
 
-/* Página do filme (/movies/:id): detalhes + avaliação */
+/* Nota do TMDB, "Ver detalhes" no hover e botão Avaliar (SCRUM-80) */
+.movie-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(15, 23, 42, 0.85);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.movie-hover {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: #0f172a;
+  background: #fff;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.15s;
+}
+.movie-link:hover .movie-hover,
+.movie-link:focus-visible .movie-hover {
+  opacity: 1;
+}
+.movie-link:hover .movie-poster img {
+  opacity: 0.6;
+}
+.movie-rate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 12px 12px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.movie-rate:hover {
+  border-color: var(--text-secondary);
+  background: var(--surface-hover);
+  text-decoration: none;
+}
+
+/* Página do filme (/movies/:id): pôster à esquerda; dados e avaliação à direita */
 .movie-page {
-  display: grid;
-  gap: 24px;
   max-width: 928px;
   margin: 0 auto;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 0;
+  border: 0;
+  color: var(--link-dark);
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 .movie-details {
   display: grid;
   grid-template-columns: 200px 1fr;
-  gap: 24px;
+  align-items: start;
+  gap: 32px;
 }
 .movie-details .movie-poster {
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
 }
 .movie-details-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
   color: var(--text-support);
+  line-height: 1.5;
 }
 .movie-details-body h1 {
   color: var(--text);
   font-size: 1.75rem;
   font-weight: 700;
+  line-height: 1.2;
 }
-.movie-details-body h1 span {
+.movie-meta,
+.movie-score {
   color: var(--text-secondary);
-  font-weight: 400;
+  font-size: 0.875rem;
 }
-.movie-tags {
+.movie-score {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  list-style: none;
+  align-items: center;
+  gap: 6px;
 }
-.movie-tags li {
-  padding: 4px 12px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: 0.75rem;
+.movie-score b {
+  color: var(--text);
+  font-size: 1rem;
 }
 .movie-cast {
   font-size: 0.875rem;
 }
-.movie-cast strong {
-  color: var(--text);
+.movie-cast span {
+  color: var(--text-secondary);
+}
+.movie-details-body > .rating-card {
+  margin-top: 8px;
 }
 .skeleton-line {
   display: block;
   height: 14px;
+  margin-bottom: 10px;
   border-radius: 6px;
   background: var(--surface-hover);
 }
@@ -294,10 +473,18 @@
   width: 60%;
 }
 @media (max-width: 600px) {
+  .search-row {
+    flex-direction: column;
+  }
+  .search-mode button {
+    flex: 1;
+    justify-content: center;
+    padding: 10px;
+  }
   .movie-details {
     grid-template-columns: 1fr;
   }
   .movie-details .movie-poster {
-    max-width: 200px;
+    max-width: 160px;
   }
 }

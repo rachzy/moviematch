@@ -8,9 +8,8 @@ export default async function MoviePage({
 }) {
   const movieId = Number((await params).id);
   return (
-    <div className="movie-page">
-      <MovieDetails movieId={movieId} />
+    <MovieDetails movieId={movieId}>
       <MovieRating movieId={movieId} />
-    </div>
+    </MovieDetails>
   );
 }

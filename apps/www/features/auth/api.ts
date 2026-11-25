@@ -1,5 +1,5 @@
 import { http } from '@/shared/lib/http';
-import type { LoginInput, LoginResponse, RegisterInput } from './types';
+import type { LoginInput, LoginResponse, RegisterInput, User } from './types';
 
 type Message = { message: string };
 
@@ -31,5 +31,11 @@ export async function resendVerification(email: string) {
   const { data } = await http.post<Message>('/auth/resend-verification', {
     email,
   });
+  return data;
+}
+
+// Dados de quem está logado (nome e e-mail no menu do topo).
+export async function getMe() {
+  const { data } = await http.get<User>('/auth/me');
   return data;
 }

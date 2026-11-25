@@ -1,16 +1,6 @@
 // Ícones do design system (Figma · "Ícones e elementos"). Decorativos: aria-hidden.
 type Props = { size?: number };
 
-export function LogoIcon({ size = 28 }: Props) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 28 28" aria-hidden="true">
-      <rect x="2" y="7" width="24" height="19" rx="4" fill="#60A5FA" />
-      <rect x="2" y="2" width="24" height="6" rx="2" fill="#93C5FD" />
-      <path d="M11 12.5v8l7-4z" fill="#fff" />
-    </svg>
-  );
-}
-
 function Outline({
   color,
   size = 60,

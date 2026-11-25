@@ -4,12 +4,19 @@ import { CloseIcon, SearchIcon } from './icons';
 
 type Props = {
   value: string;
+  placeholder?: string;
   loading?: boolean;
   onChange: (value: string) => void;
   onSubmit: () => void;
 };
 
-export function SearchBar({ value, loading, onChange, onSubmit }: Props) {
+export function SearchBar({
+  value,
+  placeholder = 'Digite o nome do filme',
+  loading,
+  onChange,
+  onSubmit,
+}: Props) {
   return (
     <form
       className="search-bar"
@@ -26,10 +33,11 @@ export function SearchBar({ value, loading, onChange, onSubmit }: Props) {
           type="text"
           value={value}
           maxLength={100}
-          placeholder="Digite o nome do filme ou do ator"
+          placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
         />
-        {value && (
+        {loading && <span className="field-spinner" aria-hidden="true" />}
+        {value && !loading && (
           <button
             type="button"
             className="search-clear"
