@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ProtectedRoute } from '@/features/auth/ui/ProtectedRoute';
 import { LogoutButton } from '@/features/auth/ui/LogoutButton';
 
@@ -11,7 +12,12 @@ export default function PrivateLayout({
   return (
     <ProtectedRoute>
       <header className="topbar">
-        <strong>MovieMatch</strong>
+        <nav className="topnav">
+          <strong>
+            Movie<span className="brand-accent">Match</span>
+          </strong>
+          <Link href="/search">Buscar</Link>
+        </nav>
         <LogoutButton />
       </header>
       <main className="private-main">{children}</main>
