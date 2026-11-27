@@ -74,6 +74,9 @@ describe('UserRepository', () => {
       id: '1',
       email: 'a@a.com',
       username: 'alice',
+      nickname: null,
+      avatarUrl: null,
+      pronouns: null,
     });
   });
 
