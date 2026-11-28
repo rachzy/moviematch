@@ -4,7 +4,11 @@ import { http } from '@/shared/lib/http';
 import type { Rating } from '../types';
 import { MovieRating } from './MovieRating';
 
-const saved: Rating = { value: 4, createdAt: '2026-11-20T12:00:00Z' };
+const saved: Rating = {
+  value: 4,
+  comment: null,
+  createdAt: '2026-11-20T12:00:00Z',
+};
 
 // Troca o adapter do axios: nenhuma chamada real à API.
 type Reply = { status: number; data?: unknown; delay?: number };
