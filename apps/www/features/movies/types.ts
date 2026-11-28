@@ -6,14 +6,9 @@ export type Movie = {
   title: string;
   year: number | null;
   posterUrl: string | null;
-  genre?: string | null;
-  studio?: string | null;
-  actors?: string[];
 };
 
 export type SearchParams = {
   q?: string;
   genre?: string;
-  studio?: string;
-  actor?: string;
 };
