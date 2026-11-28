@@ -34,7 +34,11 @@ export function SearchBar({
         onSubmit();
       }}
     >
-      <div className="search-mode-toggle" role="group" aria-label="Tipo de busca">
+      <div
+        className="search-mode-toggle"
+        role="group"
+        aria-label="Tipo de busca"
+      >
         <button
           type="button"
           className="search-mode-btn"
