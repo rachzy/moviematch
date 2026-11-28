@@ -4,9 +4,14 @@ export class Rating {
     readonly userId: string,
     readonly movieId: number,
     readonly value: number,
+    readonly comment: string | null = null,
   ) {}
 
   toPublic() {
-    return { movieId: this.movieId, value: this.value };
+    return {
+      movieId: this.movieId,
+      value: this.value,
+      comment: this.comment,
+    };
   }
 }
