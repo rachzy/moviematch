@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { searchMovies } from '../api';
-import type { Movie } from '../types';
+import type { Movie, SearchMode } from '../types';
 import { GenreFilter } from './GenreFilter';
 import { SearchBar } from './SearchBar';
 import { SearchResults } from './SearchResults';
@@ -11,38 +11,53 @@ import './movies.css';
 type Status = 'idle' | 'loading' | 'done' | 'error';
 
 export function MovieSearch() {
+  const [mode, setMode] = useState<SearchMode>('movie');
   const [text, setText] = useState('');
   const [genre, setGenre] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>('idle');
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [searched, setSearched] = useState('');
+  // Termo (e modo) da última busca disparada; o banner usa isto, não o input.
+  const [searched, setSearched] = useState({ term: '', mode });
+  const controller = useRef<AbortController>(null);
 
-  async function run(q: string, g: string | null) {
-    const term = q.trim();
-    setSearched(term);
+  async function run(term: string, g: string | null) {
+    controller.current?.abort();
+    term = term.trim();
+    setSearched({ term, mode });
+
     if (!term && !g) {
+      setMovies([]);
       setStatus('idle');
       return;
     }
+
+    const ctrl = (controller.current = new AbortController());
     setStatus('loading');
     try {
-      setMovies(
-        await searchMovies({ q: term || undefined, genre: g ?? undefined }),
+      const results = await searchMovies(
+        { q: term || undefined, genre: g ?? undefined },
+        ctrl.signal,
       );
+      if (ctrl.signal.aborted) return;
+      setMovies(results);
       setStatus('done');
     } catch {
-      setStatus('error');
+      if (!ctrl.signal.aborted) setStatus('error');
     }
   }
 
   function chooseGenre(g: string | null) {
     setGenre(g);
-    void run(text, g);
+    void run(searched.term, g);
   }
 
-  function clear() {
+  function clearAll() {
+    controller.current?.abort();
     setText('');
-    void run('', genre);
+    setGenre(null);
+    setSearched({ term: '', mode });
+    setMovies([]);
+    setStatus('idle');
   }
 
   return (
@@ -51,18 +66,48 @@ export function MovieSearch() {
       <p className="movie-search-sub">
         Busque pelo nome do filme ou do ator e filtre por gênero.
       </p>
+
       <SearchBar
+        mode={mode}
         value={text}
         loading={status === 'loading'}
+        onModeChange={setMode}
         onChange={setText}
         onSubmit={() => run(text, genre)}
       />
-      <GenreFilter value={genre} onChange={chooseGenre} />
+
+      <div className="filters-toolbar">
+        <GenreFilter value={genre} onChange={chooseGenre} />
+      </div>
+
+      {(searched.term || genre) && (
+        <div className="active-filters-bar">
+          <span className="active-filters-summary">
+            Filtros ativos:
+            {searched.term && (
+              <strong>
+                {' '}
+                {searched.mode === 'actor' ? 'Ator' : 'Filme'}: &quot;
+                {searched.term}&quot;
+              </strong>
+            )}
+            {genre && <strong> • Gênero: {genre}</strong>}
+          </span>
+          <button
+            type="button"
+            className="clear-filters-btn"
+            onClick={clearAll}
+          >
+            Limpar filtros
+          </button>
+        </div>
+      )}
+
       <SearchResults
         status={status}
         movies={movies}
-        query={searched}
-        onClear={clear}
+        query={searched.term}
+        onClear={clearAll}
       />
     </div>
   );

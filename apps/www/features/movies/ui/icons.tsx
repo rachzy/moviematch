@@ -34,3 +34,10 @@ export const FilmIcon = ({ size }: P) => (
     <path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4" />
   </svg>
 );
+
+export const ActorIcon = ({ size = 16 }: P) => (
+  <svg {...base(size)}>
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);

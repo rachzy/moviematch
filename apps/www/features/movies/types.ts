@@ -1,3 +1,5 @@
+export type SearchMode = 'movie' | 'actor';
+
 // Espelha o MovieSummary devolvido por GET /movies.
 export type Movie = {
   id: number;
@@ -6,4 +8,7 @@ export type Movie = {
   posterUrl: string | null;
 };
 
-export type SearchParams = { q?: string; genre?: string };
+export type SearchParams = {
+  q?: string;
+  genre?: string;
+};
