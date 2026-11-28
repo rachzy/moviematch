@@ -13,6 +13,12 @@ export type CreateUserData = {
   verificationSentAt?: Date | null;
 };
 
+export type UpdateProfileData = {
+  nickname?: string | null;
+  avatarUrl?: string | null;
+  pronouns?: string | null;
+};
+
 // Violação de unicidade (e-mail/username) vinda do banco, p.ex. cadastro simultâneo.
 export class DuplicateUserError extends Error {
   constructor(readonly field: 'email' | 'username') {
@@ -32,12 +38,20 @@ const toEntity = (row: UserRow) =>
     row.verificationCode,
     row.codeAttempts,
     row.verificationSentAt,
+    row.nickname,
+    row.avatarUrl,
+    row.pronouns,
   );
 
 // Único lugar que fala com o Prisma sobre usuários.
 @Injectable()
 export class UserRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findById(id: string) {
+    const row = await this.prisma.user.findUnique({ where: { id } });
+    return row ? toEntity(row) : null;
+  }
 
   async findByEmail(email: string) {
     const row = await this.prisma.user.findUnique({ where: { email } });
@@ -118,5 +132,23 @@ export class UserRepository {
         verificationSentAt: new Date(),
       },
     });
+  }
+
+  // Devolve null se o usuário não existe (P2025 do Prisma).
+  async updateProfile(userId: string, data: UpdateProfileData) {
+    try {
+      const row = await this.prisma.user.update({
+        where: { id: userId },
+        data,
+      });
+      return toEntity(row);
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2025'
+      )
+        return null;
+      throw err;
+    }
   }
 }

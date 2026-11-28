@@ -11,10 +11,20 @@ export class User {
     readonly verificationCode: string | null = null,
     readonly codeAttempts: number = 0,
     readonly verificationSentAt: Date | null = null,
+    readonly nickname: string | null = null,
+    readonly avatarUrl: string | null = null,
+    readonly pronouns: string | null = null,
   ) {}
 
   // Representação segura para devolver ao cliente (sem o hash).
   toPublic() {
-    return { id: this.id, email: this.email, username: this.username };
+    return {
+      id: this.id,
+      email: this.email,
+      username: this.username,
+      nickname: this.nickname,
+      avatarUrl: this.avatarUrl,
+      pronouns: this.pronouns,
+    };
   }
 }
