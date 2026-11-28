@@ -12,9 +12,8 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, data: UpdateProfileData) {
-    const existing = await this.users.findById(userId);
-    if (!existing) throw new NotFoundException('Usuário não encontrado');
-    const updated = await this.users.updateProfile(userId, data);
-    return updated.toPublic();
+    const user = await this.users.updateProfile(userId, data);
+    if (!user) throw new NotFoundException('Usuário não encontrado');
+    return user.toPublic();
   }
 }

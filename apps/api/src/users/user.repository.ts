@@ -134,11 +134,21 @@ export class UserRepository {
     });
   }
 
+  // Devolve null se o usuário não existe (P2025 do Prisma).
   async updateProfile(userId: string, data: UpdateProfileData) {
-    const row = await this.prisma.user.update({
-      where: { id: userId },
-      data,
-    });
-    return toEntity(row);
+    try {
+      const row = await this.prisma.user.update({
+        where: { id: userId },
+        data,
+      });
+      return toEntity(row);
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2025'
+      )
+        return null;
+      throw err;
+    }
   }
 }
