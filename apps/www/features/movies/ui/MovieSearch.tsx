@@ -1,13 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useRef, useState } from 'react';
 import { searchMovies } from '../api';
-import { STUDIOS } from '../studios';
 import type { Movie, SearchMode } from '../types';
 import { GenreFilter } from './GenreFilter';
 import { SearchBar } from './SearchBar';
 import { SearchResults } from './SearchResults';
-import { StudioFilter } from './StudioFilter';
 import './movies.css';
 
 type Status = 'idle' | 'loading' | 'done' | 'error';
@@ -16,132 +14,84 @@ export function MovieSearch() {
   const [mode, setMode] = useState<SearchMode>('movie');
   const [text, setText] = useState('');
   const [genre, setGenre] = useState<string | null>(null);
-  const [studio, setStudio] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>('idle');
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [searched, setSearched] = useState('');
+  // Termo (e modo) da última busca disparada; o banner usa isto, não o input.
+  const [searched, setSearched] = useState({ term: '', mode });
+  const controller = useRef<AbortController>(null);
 
-  async function run(
-    nextMode: SearchMode,
-    q: string,
-    g: string | null,
-    s: string | null,
-  ) {
-    const term = q.trim();
-    setSearched(term);
+  async function run(term: string, g: string | null) {
+    controller.current?.abort();
+    term = term.trim();
+    setSearched({ term, mode });
 
-    if (!term && !g && !s) {
+    if (!term && !g) {
       setMovies([]);
       setStatus('idle');
       return;
     }
 
+    const ctrl = (controller.current = new AbortController());
     setStatus('loading');
     try {
-      const results = await searchMovies({
-        q: nextMode === 'movie' && term ? term : undefined,
-        actor: nextMode === 'actor' && term ? term : undefined,
-        genre: g ?? undefined,
-        studio: s ?? undefined,
-      });
-
-      const filtered = results.filter((movie) => {
-        if (s && movie.studio && movie.studio.toLowerCase() !== s.toLowerCase()) {
-          return false;
-        }
-        if (
-          nextMode === 'actor' &&
-          term &&
-          Array.isArray(movie.actors) &&
-          !movie.actors.some((actor) =>
-            actor.toLowerCase().includes(term.toLowerCase()),
-          )
-        ) {
-          return false;
-        }
-        return true;
-      });
-
-      setMovies(filtered);
+      const results = await searchMovies(
+        { q: term || undefined, genre: g ?? undefined },
+        ctrl.signal,
+      );
+      if (ctrl.signal.aborted) return;
+      setMovies(results);
       setStatus('done');
     } catch {
-      setStatus('error');
-    }
-  }
-
-  function handleModeChange(nextMode: SearchMode) {
-    setMode(nextMode);
-    if (text.trim() || genre || studio) {
-      void run(nextMode, text, genre, studio);
+      if (!ctrl.signal.aborted) setStatus('error');
     }
   }
 
   function chooseGenre(g: string | null) {
     setGenre(g);
-    void run(mode, text, g, studio);
-  }
-
-  function chooseStudio(s: string | null) {
-    setStudio(s);
-    void run(mode, text, genre, s);
+    void run(searched.term, g);
   }
 
   function clearAll() {
+    controller.current?.abort();
     setText('');
     setGenre(null);
-    setStudio(null);
-    setSearched('');
+    setSearched({ term: '', mode });
     setMovies([]);
     setStatus('idle');
   }
-
-  const availableStudios = useMemo(() => {
-    const dynamic = movies
-      .map((m) => m.studio)
-      .filter((s): s is string => Boolean(s));
-    return Array.from(new Set([...STUDIOS, ...dynamic]));
-  }, [movies]);
-
-  const hasActiveFilters = Boolean(text.trim() || genre || studio);
 
   return (
     <div className="movie-search">
       <h1>Buscar filmes</h1>
       <p className="movie-search-sub">
-        Escolha se vai buscar pelo nome do filme ou do ator e filtre por gênero ou estúdio.
+        Busque pelo nome do filme ou do ator e filtre por gênero.
       </p>
 
       <SearchBar
         mode={mode}
         value={text}
         loading={status === 'loading'}
-        onModeChange={handleModeChange}
+        onModeChange={setMode}
         onChange={setText}
-        onSubmit={() => run(mode, text, genre, studio)}
+        onSubmit={() => run(text, genre)}
       />
 
       <div className="filters-toolbar">
         <GenreFilter value={genre} onChange={chooseGenre} />
-        <div className="filters-divider" aria-hidden="true" />
-        <StudioFilter
-          value={studio}
-          studios={availableStudios}
-          onChange={chooseStudio}
-        />
       </div>
-      
-      {hasActiveFilters && (
+
+      {(searched.term || genre) && (
         <div className="active-filters-bar">
           <span className="active-filters-summary">
             Filtros ativos:
-            {text.trim() && (
+            {searched.term && (
               <strong>
                 {' '}
-                {mode === 'actor' ? `Ator: "${text.trim()}"` : `Filme: "${text.trim()}"`}
+                {searched.mode === 'actor' ? 'Ator' : 'Filme'}: &quot;
+                {searched.term}&quot;
               </strong>
             )}
             {genre && <strong> • Gênero: {genre}</strong>}
-            {studio && <strong> • Estúdio: {studio}</strong>}
           </span>
           <button
             type="button"
@@ -156,7 +106,7 @@ export function MovieSearch() {
       <SearchResults
         status={status}
         movies={movies}
-        query={searched}
+        query={searched.term}
         onClear={clearAll}
       />
     </div>
