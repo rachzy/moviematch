@@ -1,1 +1,5 @@
-export type Rating = { value: number; createdAt: string };
+export type Rating = {
+  value: number;
+  comment: string | null;
+  createdAt: string;
+};
