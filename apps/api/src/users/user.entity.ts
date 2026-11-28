@@ -1,4 +1,4 @@
-//Entity de domínio
+// Entity de domínio: o resto da aplicação nunca lida com o tipo do Prisma.
 export class User {
   constructor(
     readonly id: string,
@@ -16,7 +16,7 @@ export class User {
     readonly pronouns: string | null = null,
   ) {}
 
-  //Para devolver ao cliente (sem o hash).
+  // Representação segura para devolver ao cliente (sem o hash).
   toPublic() {
     return {
       id: this.id,
