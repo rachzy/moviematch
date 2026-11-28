@@ -1,4 +1,4 @@
-//Para validação de nickname, avatarUrl e pronouns.
+// Para validação de nickname, avatarUrl e pronouns.
 import { z } from 'zod';
 
 const nullableTrimmed = (max: number, label: string) =>
