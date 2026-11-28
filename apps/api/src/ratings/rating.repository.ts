@@ -54,4 +54,11 @@ export class RatingRepository {
       GROUP BY r."userId", u."username"
       HAVING COUNT(*) >= ${minShared}`);
   }
+
+  async findByUser(userId: string) {
+    return this.prisma.rating.findMany({
+      where: { userId },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
 }

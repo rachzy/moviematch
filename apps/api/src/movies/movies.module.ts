@@ -19,5 +19,6 @@ import { TmdbClient } from './tmdb.client';
       },
     },
   ],
+  exports: [TmdbClient],
 })
 export class MoviesModule {}

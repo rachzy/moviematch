@@ -35,3 +35,14 @@ export class RatingsController {
     return this.ratings.upsert(user.id, movieId, body.value);
   }
 }
+
+@Controller('ratings')
+@UseGuards(JwtAuthGuard)
+export class RatingsHistoryController {
+  constructor(private readonly ratings: RatingsService) {}
+
+  @Get('history')
+  getHistory(@CurrentUser() user: AuthUser) {
+    return this.ratings.getHistory(user.id);
+  }
+}
