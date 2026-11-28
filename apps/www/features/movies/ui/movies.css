@@ -16,6 +16,50 @@
   display: flex;
   gap: 16px;
 }
+
+/* Seletor segmentado Filme | Ator */
+.search-bar .search-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  height: 52px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.search-bar .search-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background-color: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.search-bar .search-mode-btn:hover:not([aria-pressed='true']) {
+  background-color: var(--surface-hover);
+  color: var(--text);
+}
+
+.search-bar .search-mode-btn[aria-pressed='true'] {
+  background-color: var(--primary, #2563eb);
+  color: #ffffff;
+}
+
 .search-field {
   flex: 1;
   display: flex;
@@ -60,7 +104,7 @@
   padding: 0 28px;
   border: 0;
   border-radius: 12px;
-  background: var(--primary);
+  background: var(--primary, #2563eb);
   color: #fff;
   font: inherit;
   font-weight: 700;
@@ -74,13 +118,28 @@
   cursor: progress;
 }
 
+/* Linha de filtros */
+.filters-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 20px;
+}
+
+.filters-toolbar .genre-filter {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
 .genre-filter {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin: 16px 0 24px;
+  margin: 0;
 }
+
 .genre-label {
   display: flex;
   align-items: center;
@@ -89,6 +148,7 @@
   font-size: 0.8125rem;
   color: var(--text-secondary);
 }
+
 .chip {
   padding: 8px 16px;
   border: 1px solid var(--border);
@@ -103,10 +163,47 @@
   background: var(--surface-hover);
 }
 .chip[aria-pressed='true'] {
-  background: var(--primary);
-  border-color: var(--primary);
+  background: var(--primary, #2563eb);
+  border-color: var(--primary, #2563eb);
   color: #fff;
   font-weight: 700;
+}
+
+/* Barra de filtros ativos */
+.active-filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.active-filters-summary strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.clear-filters-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--link-dark);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clear-filters-btn:hover {
+  background: var(--surface-hover);
 }
 
 .results-hint {
@@ -225,4 +322,23 @@
 }
 .movie-card:hover {
   border-color: var(--focus);
+}
+
+@media (max-width: 720px) {
+  .search-bar {
+    flex-direction: column;
+  }
+
+  .search-bar .search-mode-toggle {
+    width: 100%;
+  }
+
+  .search-bar .search-mode-btn {
+    flex: 1;
+  }
+
+  .search-submit {
+    height: 48px;
+    justify-content: center;
+  }
 }
