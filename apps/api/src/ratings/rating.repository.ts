@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Rating } from './rating.entity';
 
 const toEntity = (row: RatingRow) =>
-  new Rating(row.userId, row.movieId, row.value, row.comment);
+  new Rating(row.userId, row.movieId, row.value, row.comment, row.updatedAt);
 
 export type RatingData = { value: number; comment?: string | null };
 
@@ -69,5 +69,15 @@ export class RatingRepository {
       WHERE r."userId" <> ${userId}
       GROUP BY r."userId", u."username"
       HAVING COUNT(*) >= ${minShared}`);
+  }
+
+  // Mais recentes primeiro; `take` evita disparar centenas de chamadas ao TMDB.
+  async findByUser(userId: string, take: number) {
+    const rows = await this.prisma.rating.findMany({
+      where: { userId },
+      orderBy: { updatedAt: 'desc' },
+      take,
+    });
+    return rows.map(toEntity);
   }
 }

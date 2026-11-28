@@ -21,12 +21,12 @@ import {
 } from './ratings.schemas';
 import { RatingsService } from './ratings.service';
 
-@Controller('movies/:id/rating')
+@Controller()
 @UseGuards(JwtAuthGuard)
 export class RatingsController {
   constructor(private readonly ratings: RatingsService) {}
 
-  @Get()
+  @Get('movies/:id/rating')
   get(
     @CurrentUser() user: AuthUser,
     @Param('id', ParseIntPipe) movieId: number,
@@ -34,7 +34,7 @@ export class RatingsController {
     return this.ratings.get(user.id, movieId);
   }
 
-  @Put()
+  @Put('movies/:id/rating')
   upsert(
     @CurrentUser() user: AuthUser,
     @Param('id', ParseIntPipe) movieId: number,
@@ -59,5 +59,10 @@ export class RatingsController {
     @Param('id', ParseIntPipe) movieId: number,
   ) {
     return this.ratings.remove(user.id, movieId);
+  }
+
+  @Get('ratings/history')
+  getHistory(@CurrentUser() user: AuthUser) {
+    return this.ratings.getHistory(user.id);
   }
 }

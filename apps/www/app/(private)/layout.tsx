@@ -17,6 +17,7 @@ export default function PrivateLayout({
             Movie<span className="brand-accent">Match</span>
           </strong>
           <Link href="/search">Buscar</Link>
+          <Link href="/history">Histórico</Link>
         </nav>
         <LogoutButton />
       </header>
