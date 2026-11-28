@@ -1,13 +1,15 @@
 'use client';
 
+import axios from 'axios';
 import { useEffect, useState, type FormEvent } from 'react';
 import { getMyProfile, updateMyProfile } from '../api';
 import type { UserProfile } from '../types';
-import {
-  validateProfile,
-  type ProfileErrors,
-  type ProfileFormValues,
-} from '../validation';
+
+type ProfileFormValues = {
+  nickname: string;
+  avatarUrl: string;
+  pronouns: string;
+};
 
 const toFormValues = (profile: UserProfile): ProfileFormValues => ({
   nickname: profile.nickname ?? '',
@@ -22,7 +24,8 @@ export function ProfileForm() {
     avatarUrl: '',
     pronouns: '',
   });
-  const [errors, setErrors] = useState<ProfileErrors>({});
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -52,11 +55,7 @@ export function ProfileForm() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setStatusMessage(null);
-
-    const validationErrors = validateProfile(form);
-    setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) return;
-
+    setError(null);
     setSaving(true);
     try {
       const updated = await updateMyProfile({
@@ -66,9 +65,15 @@ export function ProfileForm() {
       });
       setSavedProfile(updated);
       setForm(toFormValues(updated));
+      setAvatarFailed(false);
       setStatusMessage('Perfil atualizado.');
-    } catch {
-      setStatusMessage('Não foi possível salvar as alterações.');
+    } catch (err) {
+      // 400 traz as issues do zod; 404 traz { message }.
+      const data = axios.isAxiosError(err) ? err.response?.data : undefined;
+      setError(
+        (Array.isArray(data) ? data[0]?.message : data?.message) ||
+          'Não foi possível salvar as alterações.',
+      );
     } finally {
       setSaving(false);
     }
@@ -77,7 +82,7 @@ export function ProfileForm() {
   function handleCancel() {
     if (!savedProfile) return;
     setForm(toFormValues(savedProfile));
-    setErrors({});
+    setError(null);
     setStatusMessage(null);
   }
 
@@ -93,12 +98,14 @@ export function ProfileForm() {
         @{savedProfile.username} · {savedProfile.email}
       </p>
 
-      {savedProfile.avatarUrl && (
+      {savedProfile.avatarUrl && !avatarFailed && (
         <img
           src={savedProfile.avatarUrl}
           alt={`Foto de ${savedProfile.nickname || savedProfile.username}`}
           width={80}
           height={80}
+          referrerPolicy="no-referrer"
+          onError={() => setAvatarFailed(true)}
           style={{ borderRadius: '50%', objectFit: 'cover' }}
         />
       )}
@@ -112,7 +119,6 @@ export function ProfileForm() {
             value={form.nickname}
             onChange={(e) => setForm({ ...form, nickname: e.target.value })}
           />
-          {errors.nickname && <span role="alert">{errors.nickname}</span>}
         </div>
 
         <div className="field">
@@ -132,7 +138,6 @@ export function ProfileForm() {
               Remover foto
             </button>
           )}
-          {errors.avatarUrl && <span role="alert">{errors.avatarUrl}</span>}
         </div>
 
         <div className="field">
@@ -153,9 +158,13 @@ export function ProfileForm() {
               Remover pronomes
             </button>
           )}
-          {errors.pronouns && <span role="alert">{errors.pronouns}</span>}
         </div>
 
+        {error && (
+          <div className="error-banner" role="alert">
+            {error}
+          </div>
+        )}
         {statusMessage && <p role="status">{statusMessage}</p>}
 
         <div className="modal-actions">

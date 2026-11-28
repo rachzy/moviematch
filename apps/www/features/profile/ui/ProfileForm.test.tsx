@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from '../api';
@@ -48,5 +49,28 @@ describe('ProfileForm', () => {
         /perfil atualizado\./i,
       );
     });
+  });
+
+  it('mostra a mensagem de erro da API ao salvar', async () => {
+    vi.mocked(api.getMyProfile).mockResolvedValue({
+      id: '1',
+      email: 'caua@example.com',
+      username: 'cauagozzer',
+      nickname: null,
+      avatarUrl: null,
+      pronouns: null,
+    });
+    vi.mocked(api.updateMyProfile).mockRejectedValue(
+      new AxiosError('bad', '400', undefined, undefined, {
+        status: 400,
+        data: [{ path: ['avatarUrl'], message: 'URL inválida' }],
+      } as never),
+    );
+
+    render(<ProfileForm />);
+    await waitFor(() => screen.getByLabelText(/apelido/i));
+    fireEvent.click(screen.getByRole('button', { name: /^salvar$/i }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('URL inválida');
   });
 });
