@@ -4,6 +4,7 @@ export class Rating {
     readonly userId: string,
     readonly movieId: number,
     readonly value: number,
+    readonly updatedAt: Date = new Date(),
   ) {}
 
   toPublic() {

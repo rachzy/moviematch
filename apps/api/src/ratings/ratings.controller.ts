@@ -13,12 +13,12 @@ import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { upsertRatingSchema, type UpsertRatingDto } from './ratings.schemas';
 import { RatingsService } from './ratings.service';
 
-@Controller('movies/:id/rating')
+@Controller()
 @UseGuards(JwtAuthGuard)
 export class RatingsController {
   constructor(private readonly ratings: RatingsService) {}
 
-  @Get()
+  @Get('movies/:id/rating')
   get(
     @CurrentUser() user: AuthUser,
     @Param('id', ParseIntPipe) movieId: number,
@@ -26,7 +26,7 @@ export class RatingsController {
     return this.ratings.get(user.id, movieId);
   }
 
-  @Put()
+  @Put('movies/:id/rating')
   upsert(
     @CurrentUser() user: AuthUser,
     @Param('id', ParseIntPipe) movieId: number,
@@ -34,14 +34,8 @@ export class RatingsController {
   ) {
     return this.ratings.upsert(user.id, movieId, body.value);
   }
-}
 
-@Controller('ratings')
-@UseGuards(JwtAuthGuard)
-export class RatingsHistoryController {
-  constructor(private readonly ratings: RatingsService) {}
-
-  @Get('history')
+  @Get('ratings/history')
   getHistory(@CurrentUser() user: AuthUser) {
     return this.ratings.getHistory(user.id);
   }

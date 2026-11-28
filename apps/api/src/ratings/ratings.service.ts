@@ -1,12 +1,17 @@
-import { Injectable, NotFoundException, Optional } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { TmdbClient } from '../movies/tmdb.client';
 import { RatingRepository } from './rating.repository';
 
+// Cada item do histórico custa uma chamada ao TMDB, então o histórico é limitado.
+const HISTORY_LIMIT = 20;
+
 @Injectable()
 export class RatingsService {
+  private readonly logger = new Logger(RatingsService.name);
+
   constructor(
     private readonly ratings: RatingRepository,
-    @Optional() private readonly tmdb?: TmdbClient,
+    private readonly tmdb: TmdbClient,
   ) {}
 
   async get(userId: string, movieId: number) {
@@ -19,47 +24,26 @@ export class RatingsService {
     return (await this.ratings.upsert(userId, movieId, value)).toPublic();
   }
 
+  // `movie` é null quando o TMDB falha ou não conhece o filme; o front trata o fallback.
   async getHistory(userId: string) {
-    const rows = await this.ratings.findByUser(userId);
-
+    const ratings = await this.ratings.findByUser(userId, HISTORY_LIMIT);
     return Promise.all(
-      rows.map(async (row) => {
-        let movie: {
-          id: number;
-          title: string;
-          year: number | null;
-          posterUrl: string | null;
-        } = {
-          id: row.movieId,
-          title: `Filme #${row.movieId}`,
-          year: null,
-          posterUrl: null,
-        };
-
-        if (this.tmdb) {
-          try {
-            const details = await this.tmdb.getMovie(row.movieId);
-            if (details) {
-              movie = {
-                id: details.id,
-                title: details.title,
-                year: details.year,
-                posterUrl: details.posterUrl,
-              };
-            }
-          } catch {
-            // Mantém o fallback básico caso o TMDB falhe para algum filme
-          }
-        }
-
+      ratings.map(async (rating) => {
+        const movie = await this.tmdb.getMovie(rating.movieId).catch((err) => {
+          this.logger.warn(
+            `Falha ao buscar filme ${rating.movieId} no TMDB: ${err.message}`,
+          );
+          return null;
+        });
         return {
-          id: row.id,
-          type: 'rating' as const,
-          movieId: row.movieId,
-          value: row.value,
-          createdAt: row.createdAt,
-          updatedAt: row.updatedAt,
-          movie,
+          ...rating.toPublic(),
+          updatedAt: rating.updatedAt,
+          movie: movie && {
+            id: movie.id,
+            title: movie.title,
+            year: movie.year,
+            posterUrl: movie.posterUrl,
+          },
         };
       }),
     );
